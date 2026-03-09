@@ -342,7 +342,6 @@ body.printing textarea::placeholder { color: transparent !important; }
   <div class="id-strip">
     <div class="id-field"><span>Einsatz-Nr.</span><input class="med" type="text" id="enr" placeholder="Melder Nr."></div>
     <div class="id-field"><span>Datum</span><input class="med" type="date" id="einsatz_datum"></div>
-    <div class="id-field"><span>Alarmzeit</span><input class="sm" type="time" id="alarmzeit"></div>
     <div class="id-field"><span>Einsatzort</span><input class="wide" type="text" id="einsatzort" placeholder="Postleitzahl"></div>
     <div class="id-field"><span>Stichwort</span><input class="wide" type="text" placeholder="Meldebild / Einsatzstichwort"></div>
   </div>
@@ -365,6 +364,7 @@ body.printing textarea::placeholder { color: transparent !important; }
             <select><option value="">—</option><option>Männlich</option><option>Weiblich</option><option>Divers</option></select>
           </div>
           <div class="f"><label>Arbeitgeber / Job</label><input type="text" placeholder="z.B. Polizei, Feuerwehr, Arzt …"></div>
+          <div class="f c4"><label>Allergien / Medikamente</label><input type="text" placeholder="z.B. Penicillin-Allergie, ASS 100 mg, Metformin …"></div>
         </div>
       </div>
     </div>
@@ -378,7 +378,7 @@ body.printing textarea::placeholder { color: transparent !important; }
       <div class="s-body">
         <div class="g4">
           <div class="f"><label>Fahrzeugtyp</label>
-            <select><option value="">—</option><option>RTW</option><option>KTW</option><option>NEF</option><option>RTH</option><option>HvO</option><option>GW-San</option><option>Sonstiges</option></select>
+            <select><option value="">—</option><option>RTW</option><option>KTW</option><option>NEF</option><option>RTH</option><option>First Responder</option><option>GW-San</option><option>Sonstiges</option></select>
           </div>
           <div class="f"><label>Kennung</label><input type="text" placeholder="Florian 1-83-1"></div>
           <div class="f"><label>Wache / Org.</label><input type="text" placeholder="RW Mitte"></div>
@@ -400,7 +400,7 @@ body.printing textarea::placeholder { color: transparent !important; }
       <div class="s-body">
         <div class="g3">
           <div class="f"><label>Einsatzart</label>
-            <select><option value="">—</option><option>Notfalleinsatz (RTW)</option><option>Notarzteinsatz (NEF/RTH)</option><option>Krankentransport</option><option>Grossschadensereignis</option><option>Fehleinsatz</option></select>
+            <select><option value="">—</option><option>Notfalleinsatz (RTW)</option><option>Notarzteinsatz (NEF/RTH)</option><option>First Responder</option><option>Krankentransport</option><option>Grossschadensereignis</option><option>Fehleinsatz</option></select>
           </div>
           <div class="f"><label>Patientenlage bei Ankunft</label>
             <select><option value="">—</option><option>Bewusst, ansprechbar</option><option>Bewusstsein eingeschränkt</option><option>Bewusstlos, atmend</option><option>Bewusstlos – Reanimation</option><option>Stehend / Gehend</option><option>Sitzend</option><option>Liegend</option><option>Eingeklemmt</option></select>
@@ -497,7 +497,7 @@ body.printing textarea::placeholder { color: transparent !important; }
         </div>
         <div class="f" style="flex:1; display:flex; flex-direction:column; margin-top:6px;">
           <label>Beschreibung / Besonderheiten</label>
-          <textarea style="flex:1; min-height:40px; resize:none; font-size:9.5px;" placeholder="Genaue Beschreibung …"></textarea>
+          <textarea style="flex:1; min-height:40px; resize:none; font-size:12px;" placeholder="Genaue Beschreibung …"></textarea>
         </div>
       </div>
     </div>
@@ -623,14 +623,14 @@ body.printing textarea::placeholder { color: transparent !important; }
           <div class="f c2">
             <label>Transportiert?</label>
             <div class="rg" style="padding-top:3px;">
-              <label class="ri"><input type="radio" name="tr"> Ja</label>
-              <label class="ri"><input type="radio" name="tr"> Nein (verweigert)</label>
-              <label class="ri"><input type="radio" name="tr"> Vor Ort verstorben</label>
-              <label class="ri"><input type="radio" name="tr"> Arztvorst. vor Ort</label>
+              <label class="ri"><input type="radio" name="transportiert_wahl"> Ja</label>
+              <label class="ri"><input type="radio" name="transportiert_wahl"> Nein (verweigert)</label>
+              <label class="ri"><input type="radio" name="transportiert_wahl"> Vor Ort verstorben</label>
+              <label class="ri"><input type="radio" name="transportiert_wahl"> Arztvorst. vor Ort</label>
             </div>
           </div>
           <div class="f"><label>Transportmittel</label>
-            <select><option value="">—</option><option>RTW</option><option>KTW</option><option>RTH</option><option>NAW</option></select>
+            <select><option value="">—</option><option>RTW</option><option>KTW</option><option>RTH</option><option>NAW</option><option>Polizei</option></select>
           </div>
           <div class="f"><label>Abfahrtszeit</label><div class="vt-time-cell"><input type="text" id="abfahrt_time" placeholder="HH:MM"><button class="btn-now" onclick="setNow('abfahrt_time')">⏱ Zeit</button></div></div>
           <div class="f c2"><label>Transportziel</label><input type="text" placeholder="Klinikum Muster, Notaufnahme"></div>
@@ -654,7 +654,7 @@ body.printing textarea::placeholder { color: transparent !important; }
             <select><option value="">—</option><option>Stabil, verbessert</option><option>Stabil, unverändert</option><option>Instabil</option><option>Reanimation laufend</option><option>Verstorben vor Ort</option><option>Verstorben Transport</option></select>
           </div>
           <div class="f c2"><label>Übergabe an</label>
-            <select><option value="">—</option><option>Notaufnahme</option><option>Schockraum</option><option>Notarzt vor Ort</option><option>Hausarzt</option><option>Angehörige / Pat. selbst</option></select>
+            <select><option value="">—</option><option>Notaufnahme</option><option>Schockraum</option><option>Notarzt vor Ort</option><option>Hausarzt</option><option>Polizei</option><option>Angehörige / Pat. selbst</option></select>
           </div>
           <div class="f c2"><label>Übergebend an (Name Arzt / Personal)</label><input type="text" placeholder="Dr. Müller, Pflege N.N."></div>
           <div class="f"><label>Übergabezeit</label><div class="vt-time-cell"><input type="text" id="uebergabe_time" placeholder="HH:MM"><button class="btn-now" onclick="setNow('uebergabe_time')">⏱ Zeit</button></div></div>
@@ -737,15 +737,17 @@ body.printing textarea::placeholder { color: transparent !important; }
 (function() {
   var now = new Date();
   document.getElementById('einsatz_datum').value = now.toISOString().split('T')[0];
-  document.getElementById('alarmzeit').value =
-    String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
 })();
 
 // ── Zeit-Buttons ──
 function setNow(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
   var now = new Date();
-  document.getElementById(id).value =
-    String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  el.value = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  el.removeAttribute('readonly');
+  el.removeAttribute('disabled');
+  el.focus();
 }
 
 // ── Theme (dark default) ──
@@ -753,14 +755,15 @@ var dark = true;
 function toggleTheme() {
   dark = !dark;
   document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-  document.getElementById('theme-label').textContent = dark ? 'Hell' : 'Dunkel';
+  var lbl = document.getElementById('theme-label');
+  if (lbl) lbl.textContent = dark ? 'Hell' : 'Dunkel';
   var icon = document.getElementById('theme-icon');
-  icon.innerHTML = dark
+  if (icon) icon.innerHTML = dark
     ? '<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>'
     : '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';
 }
 
-// ── PDF Export: leere Felder mit -- füllen, Platzhalter ausblenden, Dateiname setzen ──
+// ── PDF Export ──
 function doPrint() {
   var allInputs    = document.querySelectorAll('.main input[type="text"], .main input[type="number"]');
   var allTextareas = document.querySelectorAll('.main textarea:not(.sig-author-input)');
@@ -768,6 +771,7 @@ function doPrint() {
   var changed = [];
 
   function tempFill(el) {
+    if (el.type === 'date' || el.type === 'time') return;
     if (el.value.trim() === '') {
       el.value = '--';
       changed.push({ el: el, orig: '' });
@@ -777,27 +781,28 @@ function doPrint() {
   allTextareas.forEach(tempFill);
   idInputs.forEach(tempFill);
 
-  // Enr-Wert vor -- merken für Dateinamen
-  var enrEl   = document.getElementById('enr');
-  var datumEl = document.getElementById('einsatz_datum');
-  var enrVal  = changed.find(function(c){ return c.el === enrEl; }) ? 'oNr' : enrEl.value;
-  var datum   = datumEl.value || new Date().toISOString().split('T')[0];
-  var parts   = datum.split('-');
-  var datumStr = parts.length === 3 ? parts[2] + '.' + parts[1] + '.' + parts[0] : datum;
+  // Dateiname berechnen und an Parent senden
+  var enrEl    = document.getElementById('enr');
+  var datumEl  = document.getElementById('einsatz_datum');
+  var enrVal   = (enrEl && enrEl.value.trim() && enrEl.value.trim() !== '--') ? enrEl.value.trim() : 'oNr';
+  var datum    = (datumEl && datumEl.value) ? datumEl.value : new Date().toISOString().split('T')[0];
+  var p        = datum.split('-');
+  var datumStr = p.length === 3 ? p[2]+'.'+p[1]+'.'+p[0] : datum;
+  var fileName = 'Einsatzprotokoll ' + datumStr + ' ' + enrVal;
 
-  var origTitle = document.title;
-  document.title = 'Einsatzbericht ' + datumStr + ' ' + enrVal;
+  // Eigenen Titel setzen (falls direkt geöffnet, nicht im iframe)
+  document.title = fileName;
 
-  // Add class so CSS hides placeholders of still-filled fields
+  // Parent benachrichtigen (setzt dessen Titel für den Browser-Druckdialog)
+  try { window.parent.postMessage({ type: 'proto-print-ready', fileName: fileName }, '*'); } catch(e) {}
+
   document.body.classList.add('printing');
-
   window.print();
 
   setTimeout(function() {
-    document.title = origTitle;
     document.body.classList.remove('printing');
     changed.forEach(function(item) { item.el.value = item.orig; });
-  }, 800);
+  }, 1000);
 }
 
 // ── postMessage bridge ──
