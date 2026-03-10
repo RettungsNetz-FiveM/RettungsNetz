@@ -281,6 +281,36 @@ header {
     <div class="toolbar-panel active" id="tb-dashboard"></div>
     <div class="toolbar-panel"        id="tb-info"></div>
 
+    <!-- ── MANV toolbar ── -->
+    <div class="toolbar-panel" id="tb-manv">
+      <div class="tb-sep"></div>
+      <button class="hbtn pri" onclick="manvSend('openNewPatient')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Neuer Patient
+      </button>
+      <div class="tb-sep"></div>
+      <button class="hbtn grn" onclick="manvSend('exportAll')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Alle Exportieren
+      </button>
+      <div class="tb-sep"></div>
+      <button class="hbtn blu" onclick="manvImportClick()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Importieren
+      </button>
+      <input type="file" id="idx-manvImportFile" accept=".manv,.json" style="display:none" onchange="manvImportFile(this)">
+      <div class="tb-sep"></div>
+      <button class="hbtn amb" onclick="manvSend('doPrint')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Drucken
+      </button>
+      <div class="tb-sep"></div>
+      <button class="hbtn danger" onclick="manvSend('confirmClearAll')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        Alle löschen
+      </button>
+    </div>
+
     <!-- ── PROTOKOLL toolbar ── -->
     <div class="toolbar-panel" id="tb-protokol">
       <div class="tb-sep"></div>
@@ -378,6 +408,13 @@ header {
       <span class="nav-label">Fahrzeug</span>
     </button>
 
+    <button class="nav-btn" id="nav-manv" onclick="openTool('manv')" title="MANV Triage">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      </span>
+      <span class="nav-label">MANV</span>
+    </button>
+
     <div class="sidebar-divider"></div>
 
     <button class="nav-btn" id="nav-info" onclick="showView('info')" title="Info">
@@ -418,6 +455,20 @@ header {
               <button class="mc-open-btn">Öffnen →</button>
             </div>
           </div>
+          <div class="module-card" data-accent="red" onclick="openTool('manv')">
+            <div class="mc-header">
+              <div class="mc-icon-wrap" style="font-size:22px">🚨</div>
+              <div class="mc-meta">
+                <div class="mc-tag">Modul 03 · MANV · Triage</div>
+                <div class="mc-title">MANV Triage</div>
+              </div>
+            </div>
+            <div class="mc-desc">Massenanfall von Verletzten — schnelle Patientenerfassung mit Triage-Kategorisierung (I–IV/X), Vitalwerten, Verletzungsprotokoll, Maßnahmen und Export/Import für das gesamte Einsatzteam.</div>
+            <div class="mc-footer">
+              <span class="mc-status">Bereit</span>
+              <button class="mc-open-btn">Öffnen →</button>
+            </div>
+          </div>
           <div class="module-card" data-accent="blu" onclick="openTool('fahrzeug')">
             <div class="mc-header">
               <div class="mc-icon-wrap">🚑</div>
@@ -435,7 +486,7 @@ header {
         </div>
       </div>
       <div class="sysinfo-grid">
-        <div class="sysinfo-cell"><span class="sysinfo-label">Verfügbare Module</span><span class="sysinfo-val">2</span><span class="sysinfo-note">Protokoll · Fahrzeugplaner</span></div>
+        <div class="sysinfo-cell"><span class="sysinfo-label">Verfügbare Module</span><span class="sysinfo-val">3</span><span class="sysinfo-note">Protokoll · Fahrzeugplaner · MANV</span></div>
         <div class="sysinfo-cell"><span class="sysinfo-label">Plattform</span><span class="sysinfo-val">Web</span><span class="sysinfo-note">Browser-basiert · Offline-fähig</span></div>
         <div class="sysinfo-cell"><span class="sysinfo-label">Version</span><span class="sysinfo-val">1.0</span><span class="sysinfo-note">Build 2025.03</span></div>
       </div>
@@ -449,6 +500,11 @@ header {
     <!-- ── FAHRZEUGPLANER ── -->
     <div class="tool-view" id="view-fahrzeug">
       <iframe class="tool-frame" id="frame-fahrzeug" src="" title="Fahrzeugplaner"></iframe>
+    </div>
+
+    <!-- ── MANV TRIAGE ── -->
+    <div class="tool-view" id="view-manv">
+      <iframe class="tool-frame" id="frame-manv" src="" title="MANV Triage"></iframe>
     </div>
 
     <!-- ── INFO ── -->
@@ -502,6 +558,7 @@ const MODULE_META = {
   dashboard: { label: 'Aktives Modul',            name: 'Start · Übersicht'   },
   protokol:  { label: 'Modul 01 · Dokumentation', name: 'Einsatz-Protokoll'   },
   fahrzeug:  { label: 'Modul 02 · Planung',        name: 'Fahrzeug-Planer'     },
+  manv:      { label: 'Modul 03 · MANV · Triage',  name: 'MANV Triage'         },
   info:      { label: 'Aktives Modul',             name: 'Info · Hilfe'        },
 };
 
@@ -532,7 +589,7 @@ const frameLoaded = {};
 function openTool(tool) {
   showView(tool);
   if (!frameLoaded[tool]) {
-    const src = { protokol: 'Einsatz-Protokol.html', fahrzeug: 'Fahrzeugplaner.html' };
+    const src = { protokol: 'Einsatz-Protokol.html', fahrzeug: 'Fahrzeugplaner.html', manv: 'MANV-Triage.html' };
     const f = document.getElementById('frame-' + tool);
     if (f && src[tool]) { f.src = src[tool]; frameLoaded[tool] = true; }
   }
@@ -601,6 +658,15 @@ window.addEventListener('message', e => {
     if (u) { u.disabled = !d.canUndo; u.style.opacity = d.canUndo ? '1' : '.35'; }
     if (r) { r.disabled = !d.canRedo; r.style.opacity = d.canRedo ? '1' : '.35'; }
   }
+  // MANV stats update
+  if (d.type === 'manv-stats') {
+    const s = id => document.getElementById(id);
+    if (s('idx-manv-total')) s('idx-manv-total').textContent = d.total || 0;
+    if (s('idx-manv-I'))     s('idx-manv-I').textContent     = d.I     || 0;
+    if (s('idx-manv-II'))    s('idx-manv-II').textContent    = d.II    || 0;
+    if (s('idx-manv-III'))   s('idx-manv-III').textContent   = d.III   || 0;
+    if (s('idx-manv-IVX'))   s('idx-manv-IVX').textContent   = (d.IV||0)+(d.X||0);
+  }
   // Protokoll meldet Dateinamen — Titel setzen, nach Druck wiederherstellen
   if (d.type === 'proto-filename' && d.fileName) {
     const origTitle = document.title;
@@ -612,6 +678,29 @@ window.addEventListener('message', e => {
     window.addEventListener('afterprint', restoreTitle);
   }
 });
+
+// ── MANV ──
+function manvSend(fn, arg) {
+  const f = document.getElementById('frame-manv');
+  if (f && f.contentWindow) {
+    f.contentWindow.postMessage({ target: 'manv', fn, arg }, '*');
+  }
+}
+function manvImportClick() {
+  document.getElementById('idx-manvImportFile').click();
+}
+function manvImportFile(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const f = document.getElementById('frame-manv');
+    if (f && f.contentWindow) {
+      f.contentWindow.postMessage({ target: 'manv', fn: 'importFromParent', arg: e.target.result }, '*');
+    }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
 </script>
 </body>
 </html>

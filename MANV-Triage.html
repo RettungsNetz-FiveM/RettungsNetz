@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MANV Triage — RettungsNetz</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;500;600;700;800;900&family=Share+Tech+Mono&family=Barlow:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ══ VARS ══ */
+:root {
+  --bg:#080b10; --sf:#0d1117; --sf2:#111822; --sf3:#161e2e;
+  --bd:#1e2a3a; --bd2:#253040; --red:#e63946; --red2:#c1121f;
+  --amb:#f4a261; --grn:#52b788; --blu:#4895ef;
+  --txt:#cdd6e8; --txt2:#8a9ab5; --dim:#4a5a70; --white:#f0f4fa;
+  --mono:'Share Tech Mono',monospace; --cond:'Barlow Condensed',sans-serif; --sans:'Barlow',sans-serif;
+  /* Modal uses Protokoll dark-theme vars */
+  --m-bg:#141414; --m-card:#1E1E1E; --m-g1:#E8E8E8; --m-g2:#CCCCCC;
+  --m-g4:#777777; --m-g5:#555555; --m-g6:#333333; --m-g7:#282828;
+  --m-bd:1px solid #383838; --m-inp:#282828; --m-foc:#2E2E2E; --m-head:#252525;
+  --rot:#C0392B; --rot-d:#922B21;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;background:var(--bg);color:var(--txt);font-family:var(--sans);overflow:hidden;}
+
+/* ══ APP SHELL ══ */
+.app-shell{display:flex;height:100vh;overflow:hidden;}
+
+/* ══ SIDEBAR ══ */
+.sidebar{
+  width:240px;background:var(--sf);border-right:1px solid var(--bd);
+  display:flex;flex-direction:column;flex-shrink:0;z-index:200;overflow-y:auto;
+}
+.sb-section{border-bottom:1px solid var(--bd);padding:10px 14px;}
+.sb-label{font-family:var(--mono);font-size:7px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;margin-bottom:6px;}
+
+/* Search */
+.search-wrap{position:relative;}
+.search-wrap input{
+  width:100%;border:1px solid var(--bd);background:var(--sf2);
+  padding:6px 8px 6px 28px;font-family:var(--sans);font-size:11px;
+  color:var(--txt);outline:none;transition:border-color .15s;border-radius:2px;
+}
+.search-wrap input:focus{border-color:var(--red);}
+.search-wrap input::placeholder{color:var(--dim);}
+.search-icon{position:absolute;left:8px;top:50%;transform:translateY(-50%);color:var(--dim);pointer-events:none;width:12px;height:12px;}
+
+/* Filter tabs */
+.filter-tabs{display:flex;flex-direction:column;gap:2px;}
+.ftab{
+  display:flex;align-items:center;gap:8px;padding:6px 9px;
+  border:1px solid transparent;border-radius:3px;cursor:pointer;transition:all .15s;
+}
+.ftab:hover{background:var(--sf2);border-color:var(--bd);}
+.ftab.active{background:var(--sf3);border-color:var(--bd2);}
+.ftab-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+.ftab-label{font-family:var(--mono);font-size:8.5px;letter-spacing:1px;text-transform:uppercase;color:var(--txt2);flex:1;line-height:1.3;}
+.ftab.active .ftab-label{color:var(--white);}
+.ftab-count{font-family:var(--mono);font-size:11px;color:var(--dim);min-width:18px;text-align:right;}
+.ftab.active .ftab-count{color:var(--txt);}
+
+/* Patient list */
+.plist{display:flex;flex-direction:column;overflow-y:auto;flex:1;}
+.pl-item{
+  display:flex;align-items:center;gap:8px;padding:8px 14px;
+  border-bottom:1px solid var(--bd);cursor:pointer;transition:background .1s;
+}
+.pl-item:hover{background:var(--sf2);}
+.pl-item.is-done{opacity:.65;}
+.pl-bar{width:4px;height:34px;border-radius:2px;flex-shrink:0;}
+.pl-info{flex:1;min-width:0;}
+.pl-num{font-family:var(--mono);font-size:8.5px;letter-spacing:1px;color:var(--dim);text-transform:uppercase;}
+.pl-name{font-family:var(--sans);font-size:12px;font-weight:500;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pl-name.unk{color:var(--dim);font-style:italic;}
+.pl-sub{font-family:var(--mono);font-size:7.5px;color:var(--txt2);}
+.pl-badge{font-family:var(--mono);font-size:9px;font-weight:700;padding:2px 5px;border-radius:2px;flex-shrink:0;white-space:nowrap;}
+
+/* ══ CONTENT AREA ══ */
+.content-area{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.grid-view{
+  flex:1;overflow-y:auto;padding:16px;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;align-content:start;
+}
+
+/* ══ PATIENT CARD ══ */
+.pat-card{background:var(--sf);border:1px solid var(--bd);border-radius:3px;overflow:hidden;cursor:pointer;transition:border-color .15s;}
+.pat-card:hover{border-color:var(--bd2);}
+.pat-card.done{border-style:dashed;opacity:.72;}
+.done-stamp{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(82,183,136,.08);border-bottom:1px solid rgba(82,183,136,.2);
+  padding:3px 12px;font-family:var(--mono);font-size:7.5px;letter-spacing:1px;text-transform:uppercase;color:var(--grn);
+}
+.pat-head{display:flex;align-items:center;border-bottom:1px solid var(--bd);}
+.pat-stripe{width:6px;height:52px;flex-shrink:0;}
+.pat-numbox{display:flex;flex-direction:column;align-items:center;justify-content:center;width:44px;height:52px;border-right:1px solid var(--bd);flex-shrink:0;}
+.pat-num{font-family:var(--cond);font-size:22px;font-weight:800;color:var(--white);line-height:1;}
+.pat-num-lbl{font-family:var(--mono);font-size:6px;letter-spacing:1px;color:var(--dim);text-transform:uppercase;}
+.pat-info{flex:1;padding:0 10px;display:flex;flex-direction:column;justify-content:center;gap:2px;}
+.pat-name{font-family:var(--sans);font-size:14px;font-weight:600;color:var(--white);line-height:1;}
+.pat-name.unk{color:var(--dim);font-style:italic;}
+.pat-dob{font-family:var(--mono);font-size:8.5px;color:var(--txt2);}
+.pat-catbox{display:flex;flex-direction:column;align-items:center;justify-content:center;width:52px;height:52px;flex-shrink:0;border-left:1px solid var(--bd);gap:1px;}
+.pat-roman{font-family:var(--cond);font-size:20px;font-weight:900;line-height:1;}
+.pat-cat-lbl{font-family:var(--mono);font-size:6px;letter-spacing:.5px;text-transform:uppercase;text-align:center;line-height:1.2;}
+.pat-body{padding:10px 12px;display:flex;flex-direction:column;gap:7px;}
+.pat-vitals{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;}
+.vc{background:var(--sf2);border:1px solid var(--bd);border-radius:3px;padding:5px 6px;display:flex;flex-direction:column;gap:1px;}
+.vc-l{font-family:var(--mono);font-size:6px;letter-spacing:1px;color:var(--dim);text-transform:uppercase;}
+.vc-v{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--txt);line-height:1;}
+.pat-diag{font-family:var(--sans);font-size:11.5px;color:var(--txt2);font-weight:300;line-height:1.4;padding:7px 9px;background:var(--sf2);border:1px solid var(--bd);border-radius:3px;min-height:34px;}
+.pat-diag.empty{color:var(--dim);font-style:italic;}
+.pat-foot{display:flex;align-items:center;border-top:1px solid var(--bd);padding:5px 12px;gap:7px;}
+.pat-ftime{font-family:var(--mono);font-size:7.5px;color:var(--dim);}
+.pat-tags{display:flex;gap:4px;flex:1;flex-wrap:wrap;}
+.ptag{font-family:var(--mono);font-size:7px;padding:2px 5px;border-radius:2px;text-transform:uppercase;}
+.pat-actions{display:flex;gap:4px;}
+.cbtn{
+  font-family:var(--mono);font-size:8px;padding:3px 8px;height:22px;
+  border:1px solid var(--bd);background:var(--sf2);color:var(--txt2);
+  cursor:pointer;border-radius:2px;text-transform:uppercase;
+  transition:all .12s;white-space:nowrap;display:flex;align-items:center;gap:3px;
+}
+.cbtn:hover{border-color:var(--red);color:var(--red);}
+.cbtn.done-btn{border-color:rgba(82,183,136,.3);color:var(--grn);}
+.cbtn.done-btn:hover{background:rgba(82,183,136,.1);}
+.cbtn.undo-btn{border-color:rgba(244,162,97,.3);color:var(--amb);}
+.cbtn.undo-btn:hover{background:rgba(244,162,97,.1);}
+
+/* ══ EMPTY STATE ══ */
+.empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:40px;}
+.empty-icon{font-size:48px;opacity:.3;}
+.empty-title{font-family:var(--cond);font-size:24px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--dim);}
+.empty-sub{font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--dim);text-transform:uppercase;}
+
+/* ══ TOAST ══ */
+.toast{
+  position:fixed;bottom:20px;right:20px;background:var(--sf2);border:1px solid var(--bd2);
+  padding:10px 16px;border-radius:4px;z-index:3000;font-family:var(--mono);font-size:10px;
+  color:var(--txt);transform:translateY(20px);opacity:0;transition:all .3s;pointer-events:none;
+}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.ok{border-color:var(--grn);color:var(--grn);}
+.toast.err{border-color:var(--red);color:var(--red);}
+
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px;}
+
+/* ══════════════════════════════════════════════════════════
+   MODAL — 1:1 Protokoll dark-theme style
+══════════════════════════════════════════════════════════ */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:1000;display:none;align-items:center;justify-content:center;padding:14px;}
+.modal-overlay.open{display:flex;}
+.modal{
+  background:var(--m-bg);border:1px solid #2a2a2a;
+  width:940px;max-width:100%;max-height:96vh;
+  display:flex;flex-direction:column;
+  box-shadow:0 20px 80px rgba(0,0,0,.7);
+  font-family:'IBM Plex Sans',sans-serif;
+}
+
+/* Modal topbar — identical to Protokoll .topbar style */
+.modal-topbar{
+  background:#0d1117;border-bottom:2px solid var(--rot);
+  display:flex;align-items:center;height:54px;flex-shrink:0;
+}
+.modal-stripe{width:6px;height:100%;flex-shrink:0;}
+.modal-tl{display:flex;align-items:center;gap:0;flex:1;}
+.modal-name{display:flex;flex-direction:column;gap:2px;padding:0 16px;border-right:1px solid #1e2a3a;height:54px;justify-content:center;}
+.modal-title{font-family:'IBM Plex Sans',sans-serif;font-size:14px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:#f0f4fa;line-height:1;}
+.modal-title span{color:var(--rot);}
+.modal-sub{font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:2px;color:#4a5a70;text-transform:uppercase;}
+.modal-status{display:flex;align-items:center;gap:8px;padding:0 18px;border-right:1px solid #1e2a3a;height:54px;}
+.modal-dot{width:7px;height:7px;border-radius:50%;background:#52b788;box-shadow:0 0 6px rgba(82,183,136,.5);}
+.modal-dot-lbl{font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:1.5px;color:#52b788;text-transform:uppercase;}
+.modal-spacer{flex:1;}
+/* Right side: transport toggle + close */
+.modal-tr{display:flex;align-items:center;gap:6px;padding:0 14px;}
+.modal-done-toggle{
+  display:flex;align-items:center;gap:8px;padding:6px 12px;
+  border:1px solid #1e2a3a;background:#111822;cursor:pointer;
+  font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1.5px;
+  text-transform:uppercase;color:#8a9ab5;transition:all .15s;border-radius:2px;
+}
+.modal-done-toggle:hover{border-color:#253040;color:#cdd6e8;}
+.modal-done-toggle.active{background:rgba(82,183,136,.12);border-color:var(--grn);color:var(--grn);}
+.modal-close{
+  border:1px solid #1e2a3a;height:30px;padding:0 13px;cursor:pointer;
+  font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1.5px;
+  text-transform:uppercase;background:#111822;color:#8a9ab5;
+  display:flex;align-items:center;gap:6px;transition:all .15s;border-radius:2px;
+}
+.modal-close:hover{border-color:#253040;color:var(--red);}
+.modal-body{flex:1;overflow-y:auto;background:var(--m-bg);display:flex;flex-direction:column;gap:2px;padding:6px;}
+.modal-footer{
+  border-top:1px solid #2a2a2a;padding:10px 14px;
+  display:flex;gap:6px;justify-content:flex-end;flex-shrink:0;background:var(--m-bg);
+}
+
+/* Section blocks — Protokoll .section style */
+.ms{background:var(--m-card);border-left:4px solid transparent;display:flex;flex-direction:column;}
+.ms-head{background:var(--m-head);padding:5px 11px;display:flex;align-items:center;gap:7px;border-bottom:var(--m-bd);flex-shrink:0;}
+.ms-num{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:700;min-width:18px;}
+.ms-title{font-size:9px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--m-g2);}
+.ms-body{padding:9px 11px;display:flex;flex-direction:column;gap:7px;}
+
+/* Category selector */
+.cat-selector{display:flex;gap:5px;}
+.cat-btn{flex:1;padding:10px 6px;cursor:pointer;border:2px solid transparent;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:3px;background:var(--m-g7);}
+.cat-btn:hover{filter:brightness(1.15);}
+.cat-btn.sel{box-shadow:0 0 14px rgba(255,255,255,.1);}
+.cat-roman{font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:700;line-height:1;}
+.cat-lbl{font-family:'IBM Plex Mono',monospace;font-size:7px;letter-spacing:1px;text-transform:uppercase;text-align:center;line-height:1.3;color:var(--m-g4);}
+.cat-I{background:rgba(230,57,70,.1);} .cat-I .cat-roman{color:#e63946;} .cat-btn.sel.cat-I{border-color:#e63946;box-shadow:0 0 16px rgba(230,57,70,.3);}
+.cat-II{background:rgba(244,162,97,.08);} .cat-II .cat-roman{color:#f4a261;} .cat-btn.sel.cat-II{border-color:#f4a261;box-shadow:0 0 16px rgba(244,162,97,.3);}
+.cat-III{background:rgba(82,183,136,.08);} .cat-III .cat-roman{color:#52b788;} .cat-btn.sel.cat-III{border-color:#52b788;box-shadow:0 0 16px rgba(82,183,136,.3);}
+.cat-IV{background:rgba(72,149,239,.06);} .cat-IV .cat-roman{color:#4895ef;} .cat-btn.sel.cat-IV{border-color:#4895ef;box-shadow:0 0 16px rgba(72,149,239,.2);}
+.cat-X{background:rgba(85,94,110,.12);} .cat-X .cat-roman{color:#555e6e;} .cat-btn.sel.cat-X{border-color:#555e6e;}
+
+/* Fields — Protokoll .f style */
+.f{display:flex;flex-direction:column;gap:2px;}
+.f>label{font-size:8px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--m-g4);}
+.f input[type="text"],.f select,.f textarea{
+  width:100%;border:var(--m-bd);background:var(--m-inp);
+  padding:5px 7px;font-family:'IBM Plex Sans',sans-serif;font-size:11px;
+  color:var(--m-g1);outline:none;transition:border-color .15s,background .15s;
+  border-radius:0;appearance:none;-webkit-appearance:none;
+}
+.f input[type="text"]:focus,.f select:focus,.f textarea:focus{border-color:var(--rot);background:var(--m-foc);}
+.f textarea{resize:vertical;min-height:52px;line-height:1.45;}
+.f select{
+  cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath d='M0 0l4.5 5 4.5-5z' fill='%23888'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 7px center;padding-right:22px;
+  background-color:var(--m-inp);
+}
+
+/* Zeit button */
+.tc{display:flex;align-items:stretch;gap:2px;}
+.tc input[type="text"]{flex:1;min-width:0;}
+.btn-now{
+  background:var(--rot);color:#fff;border:none;cursor:pointer;
+  font-size:8px;font-weight:700;padding:0 7px;white-space:nowrap;
+  font-family:'IBM Plex Sans',sans-serif;flex-shrink:0;
+  display:flex;align-items:center;transition:background .15s;
+}
+.btn-now:hover{background:var(--rot-d);}
+
+/* Grids */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px 10px;}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px 10px;}
+.c2{grid-column:span 2;} .c3{grid-column:span 3;} .c4{grid-column:span 4;}
+
+/* Massnahmen groups */
+.m-grp{display:flex;flex-direction:column;gap:4px;}
+.m-grp-lbl{font-size:8px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;display:inline-block;}
+.m-grp-lbl.rot{color:#C0392B;border-left:3px solid #C0392B;padding-left:5px;background:rgba(192,57,43,.08);}
+.m-grp-lbl.blau{color:#1A6B9A;border-left:3px solid #1A6B9A;padding-left:5px;background:rgba(26,107,154,.08);}
+.m-grp-lbl.gruen{color:#1A7A5E;border-left:3px solid #1A7A5E;padding-left:5px;background:rgba(26,122,94,.08);}
+.m-row{display:flex;gap:14px;align-items:flex-start;}
+.m-row>.m-grp{flex:1;}
+.m-sep{width:1px;background:var(--m-g6);align-self:stretch;flex-shrink:0;}
+.cg-lg{display:flex;flex-wrap:wrap;gap:5px 10px;}
+.ci-lg{display:flex;align-items:center;gap:5px;cursor:pointer;font-size:11.5px;font-weight:500;color:var(--m-g1);user-select:none;line-height:1.4;font-family:'IBM Plex Sans',sans-serif;}
+.ci-lg input[type="checkbox"]{width:13px;height:13px;accent-color:var(--rot);cursor:pointer;margin:0;flex-shrink:0;}
+.m-col{flex-direction:column;gap:4px;}
+.divider{height:1px;background:var(--m-g6);flex-shrink:0;margin:2px 0;}
+
+/* ══ VITALS TABLE (Medikamentengabe) — 1:1 from Protokoll ══
+   The key: vt-select uses background:var(--m-inp) = #282828 → dark background
+   color:var(--m-g1) = #E8E8E8 → light text. Identical to .vt-select in Protokoll */
+.vt{width:100%;border-collapse:collapse;font-size:10px;}
+.vt th{
+  background:var(--m-head);border:var(--m-bd);padding:4px 6px;
+  text-align:center;font-size:8px;font-weight:700;letter-spacing:.05em;
+  text-transform:uppercase;color:var(--m-g4);
+}
+.vt td{border:var(--m-bd);padding:1px;}
+.vt td input[type="text"]{
+  width:100%;border:none;background:transparent;
+  padding:4px 5px;font-family:'IBM Plex Mono',monospace;font-size:10px;
+  color:var(--m-g1);outline:none;text-align:center;
+}
+.vt td input[type="text"]:focus{background:var(--m-foc);}
+.vt tr:nth-child(even) td{background:rgba(255,255,255,.025);}
+/* vt-select: identical styling to Protokoll — dark background, light text */
+.vt-select{
+  width:100%;border:var(--m-bd);outline:none;cursor:pointer;
+  background:var(--m-inp);color:var(--m-g1);
+  padding:4px 22px 4px 7px;font-size:10px;font-family:'IBM Plex Sans',sans-serif;
+  appearance:none;-webkit-appearance:none;
+  transition:border-color .15s,background .15s;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath d='M0 0l4.5 5 4.5-5z' fill='%23888'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 7px center;
+  background-color:var(--m-inp);
+}
+.vt-select:focus{border-color:var(--rot);background-color:var(--m-foc);}
+.vt-select option{background:#282828;color:#E8E8E8;}
+.vt-tc{display:flex;align-items:center;gap:2px;padding:1px 2px;}
+.vt-tc input[type="text"]{flex:1;min-width:0;}
+.btn-add-row{
+  margin-top:5px;font-size:9px;font-weight:700;padding:4px 12px;
+  background:var(--rot);color:#fff;border:none;cursor:pointer;
+  letter-spacing:.04em;align-self:flex-start;font-family:'IBM Plex Sans',sans-serif;
+}
+.btn-add-row:hover{background:var(--rot-d);}
+
+/* Modal footer buttons — Protokoll .btn-top style */
+.mbtn{
+  border:1px solid #1e2a3a;height:30px;padding:0 13px;cursor:pointer;
+  font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1.5px;
+  text-transform:uppercase;background:#111822;color:#8a9ab5;
+  display:flex;align-items:center;gap:6px;transition:all .15s;border-radius:2px;
+}
+.mbtn:hover{border-color:#253040;color:#cdd6e8;}
+.mbtn.pri{background:var(--rot);border-color:var(--rot);color:#fff;}
+.mbtn.pri:hover{background:var(--rot-d);border-color:var(--rot-d);}
+.mbtn.grn{background:#1a3a2a;border-color:var(--grn);color:var(--grn);}
+.mbtn.grn:hover{background:#224433;}
+
+/* Print */
+@media print{
+  .einsatz-strip{display:none!important;}
+  .content-area{height:auto;overflow:visible;}
+  .grid-view{display:block;}
+  .pat-card{break-inside:avoid;margin-bottom:10px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ APP SHELL ══ -->
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <!-- Search -->
+    <div class="sb-section">
+      <div class="sb-label">Patientensuche</div>
+      <div class="search-wrap">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="search-inp" placeholder="Name suchen …" autocomplete="off" oninput="render()">
+      </div>
+    </div>
+
+    <!-- Filter: Kategorie -->
+    <div class="sb-section">
+      <div class="sb-label">Triage-Kategorie</div>
+      <div class="filter-tabs">
+        <div class="ftab active" id="ftab-cat-all" onclick="setCat('all')"><div class="ftab-dot" style="background:var(--bd2)"></div><div class="ftab-label">Alle Kategorien</div><div class="ftab-count" id="fc-all">0</div></div>
+        <div class="ftab" id="ftab-cat-I"   onclick="setCat('I')">  <div class="ftab-dot" style="background:#e63946"></div><div class="ftab-label">I — Sofort</div>        <div class="ftab-count" id="fc-I">0</div></div>
+        <div class="ftab" id="ftab-cat-II"  onclick="setCat('II')"> <div class="ftab-dot" style="background:#f4a261"></div><div class="ftab-label">II — Dringend</div>      <div class="ftab-count" id="fc-II">0</div></div>
+        <div class="ftab" id="ftab-cat-III" onclick="setCat('III')"><div class="ftab-dot" style="background:#52b788"></div><div class="ftab-label">III — Nicht Dringend</div><div class="ftab-count" id="fc-III">0</div></div>
+        <div class="ftab" id="ftab-cat-IV"  onclick="setCat('IV')"> <div class="ftab-dot" style="background:#4895ef"></div><div class="ftab-label">IV — Abwartend</div>     <div class="ftab-count" id="fc-IV">0</div></div>
+        <div class="ftab" id="ftab-cat-X"   onclick="setCat('X')">  <div class="ftab-dot" style="background:#555e6e"></div><div class="ftab-label">X — Verstorben</div>     <div class="ftab-count" id="fc-X">0</div></div>
+      </div>
+    </div>
+
+    <!-- Filter: Transport-Status -->
+    <div class="sb-section">
+      <div class="sb-label">Transport-Status</div>
+      <div class="filter-tabs">
+        <div class="ftab active" id="ftab-tr-all"  onclick="setTrans('all')"> <div class="ftab-dot" style="background:var(--bd2)"></div><div class="ftab-label">Alle</div>                  <div class="ftab-count" id="fc-tr-all">0</div></div>
+        <div class="ftab" id="ftab-tr-open" onclick="setTrans('open')"><div class="ftab-dot" style="background:#e63946"></div><div class="ftab-label">Nicht abtransportiert</div><div class="ftab-count" id="fc-tr-open">0</div></div>
+        <div class="ftab" id="ftab-tr-done" onclick="setTrans('done')"><div class="ftab-dot" style="background:#52b788"></div><div class="ftab-label">Abtransportiert</div>      <div class="ftab-count" id="fc-tr-done">0</div></div>
+      </div>
+    </div>
+
+    <!-- Patient list -->
+    <div class="sb-section" style="padding:8px 14px 4px;"><div class="sb-label">Patienten</div></div>
+    <div class="plist" id="plist"></div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content-area">
+    <div class="grid-view" id="grid-view"></div>
+    <div class="empty-state" id="empty-state">
+      <div class="empty-icon">🚑</div>
+      <div class="empty-title">Keine Patienten</div>
+      <div class="empty-sub">Über „Neuer Patient" in der Kopfzeile starten</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     MODAL — Protokoll-style topbar + sections
+══════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-overlay" onclick="overlayClick(event)">
+  <div class="modal" id="modal-box">
+
+    <!-- Modal topbar (Protokoll style) -->
+    <div class="modal-topbar">
+      <div class="modal-stripe" id="modal-stripe"></div>
+      <div class="modal-tl">
+        <div class="modal-name">
+          <div class="modal-title" id="modal-title">Neuer <span>Patient</span></div>
+          <div class="modal-sub" id="modal-sub">MANV · Triage · Dokumentation</div>
+        </div>
+        <div class="modal-status">
+          <div class="modal-dot"></div>
+          <div class="modal-dot-lbl">Aktiv</div>
+        </div>
+        <div class="modal-spacer"></div>
+        <div class="modal-tr">
+          <!-- Transport done toggle in topbar -->
+          <button class="modal-close" id="done-toggle" onclick="toggleDone()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11"><polyline points="20 6 9 17 4 12"/></svg>
+            <span id="done-label">Nicht abtransportiert</span>
+          </button>
+          <button class="modal-close" id="btn-exp-single" onclick="exportSingle()" style="display:none;background:#1a3a2a;border-color:#52b788;color:#52b788;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export
+          </button>
+          <button class="modal-close" onclick="closeModal()">✕ Schließen</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- 01 TRIAGE -->
+      <div class="ms" style="border-left-color:#C0392B;">
+        <div class="ms-head"><span class="ms-num" style="color:#C0392B;">01</span><span class="ms-title">Triage-Kategorie</span></div>
+        <div class="ms-body">
+          <div class="cat-selector">
+            <div class="cat-btn cat-I"   id="cb-cat-I"   onclick="selCat('I')">  <div class="cat-roman">I</div>  <div class="cat-lbl">Sofort</div></div>
+            <div class="cat-btn cat-II"  id="cb-cat-II"  onclick="selCat('II')"> <div class="cat-roman">II</div> <div class="cat-lbl">Dringend</div></div>
+            <div class="cat-btn cat-III" id="cb-cat-III" onclick="selCat('III')"><div class="cat-roman">III</div><div class="cat-lbl">Nicht Dringend</div></div>
+            <div class="cat-btn cat-IV"  id="cb-cat-IV"  onclick="selCat('IV')"> <div class="cat-roman">IV</div> <div class="cat-lbl">Abwartend</div></div>
+            <div class="cat-btn cat-X"   id="cb-cat-X"   onclick="selCat('X')">  <div class="cat-roman">X</div>  <div class="cat-lbl">Verstorben</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 02 PATIENTENDATEN -->
+      <div class="ms" style="border-left-color:#C0392B;">
+        <div class="ms-head"><span class="ms-num" style="color:#C0392B;">02</span><span class="ms-title">Patientendaten</span></div>
+        <div class="ms-body">
+          <div class="g4">
+            <div class="f c2"><label>Name (falls bekannt)</label><input type="text" id="f-name" placeholder="Mustermann, Max / Unbekannt" autocomplete="off"></div>
+            <div class="f"><label>Geburtsdatum / Alter</label><input type="text" id="f-dob" placeholder="TT.MM.JJJJ / ~30 J" autocomplete="off"></div>
+            <div class="f"><label>Geschlecht</label>
+              <select id="f-sex"><option value="">—</option><option>Männlich</option><option>Weiblich</option><option>Divers</option></select>
+            </div>
+            <div class="f c3"><label>Fundort / Sektor / Position</label><input type="text" id="f-fundort" placeholder="z.B. Sektor A / Abschnitt 3" autocomplete="off"></div>
+            <div class="f"><label>Auffindezeitpunkt</label>
+              <div class="tc"><input type="text" id="f-findtime" placeholder="HH:MM" autocomplete="off"><button class="btn-now" onclick="setNow('f-findtime')">⏱ Zeit</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 03 VITALWERTE -->
+      <div class="ms" style="border-left-color:#1A7A5E;">
+        <div class="ms-head"><span class="ms-num" style="color:#1A7A5E;">03</span><span class="ms-title">Vitalwerte &amp; ABCDE-Schema</span></div>
+        <div class="ms-body">
+          <div class="g4">
+            <div class="f"><label>A — Atemweg</label>
+              <select id="f-atemweg"><option value="">—</option><option>Frei</option><option>Verlegt</option><option>Intubiert</option><option>Gesichert (SGA)</option></select>
+            </div>
+            <div class="f"><label>B — Atmung</label>
+              <select id="f-atmung"><option value="">—</option><option>Normal 12–20/min</option><option>Tachypnoe &gt;20</option><option>Bradypnoe &lt;12</option><option>Schnappatmung</option><option>Keine Atmung</option><option>Beatmet</option></select>
+            </div>
+            <div class="f"><label>C — Kreislauf</label>
+              <select id="f-kreislauf"><option value="">—</option><option>Stabil</option><option>Tachykardie</option><option>Bradykardie</option><option>Hypotonie</option><option>Hypertonie</option><option>Kreislaufstillstand</option></select>
+            </div>
+            <div class="f"><label>D — Bewusstsein (GCS)</label>
+              <select id="f-gcs"><option value="">—</option><option>15 — Orientiert</option><option>13–14</option><option>10–12</option><option>7–9</option><option>3–6</option><option>3 — Komatös</option></select>
+            </div>
+            <div class="f"><label>Puls /min</label><input type="text" id="f-puls" placeholder="80" autocomplete="off" autocorrect="off" spellcheck="false"></div>
+            <div class="f"><label>RR syst./diast. mmHg</label><input type="text" id="f-rr" placeholder="120/80" autocomplete="off" autocorrect="off" spellcheck="false"></div>
+            <div class="f"><label>SpO₂ %</label><input type="text" id="f-spo2" placeholder="97" autocomplete="off" autocorrect="off" spellcheck="false"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 04 VERLETZUNGEN -->
+      <div class="ms" style="border-left-color:#B8470B;">
+        <div class="ms-head"><span class="ms-num" style="color:#B8470B;">04</span><span class="ms-title">Verletzungsmuster &amp; Diagnose</span></div>
+        <div class="ms-body">
+          <div class="g3">
+            <div class="f c2"><label>Hauptverletzung / Leitsymptom</label><input type="text" id="f-hauptv" placeholder="z.B. SHT, Thoraxtrauma, Polytrauma …" autocomplete="off"></div>
+            <div class="f"><label>Unfallmechanismus</label>
+              <select id="f-mech"><option value="">—</option><option>Stumpfes Trauma</option><option>Penetrierendes Trauma</option><option>Verbrennungen</option><option>Inhalationstrauma</option><option>Sturz</option><option>Explosion / Druckwelle</option><option>Elektrounfall</option><option>Schussverletzung</option><option>Internistisch</option><option>Sonstiges</option></select>
+            </div>
+          </div>
+          <div class="f"><label>Verletzungsart (Mehrfachauswahl)</label>
+            <div class="cg-lg" style="margin-top:3px;">
+              <label class="ci-lg"><input type="checkbox" id="cb-poly"> Polytrauma</label>
+              <label class="ci-lg"><input type="checkbox" id="cb-sht"> SHT (V.a.)</label>
+              <label class="ci-lg"><input type="checkbox" id="cb-thorax"> Thoraxtrauma</label>
+              <label class="ci-lg"><input type="checkbox" id="cb-abdo"> Abdominaltrauma</label>
+              <label class="ci-lg"><input type="checkbox" id="cb-hws"> HWS-Trauma (V.a.)</label>
+              <label class="ci-lg"><input type="checkbox" id="cb-amp"> Amputation</label>
+              <label class="ci-lg"><input type="checkbox" id="cb-frak"> Fraktur (V.a.)</label>
+              <label class="ci-lg"><input type="checkbox" id="cb-verb"> Verbrennung</label>
+              <label class="ci-lg"><input type="checkbox" id="cb-blut"> Starke Blutung</label>
+            </div>
+          </div>
+          <div class="f"><label>Befundbeschreibung / Anamnese</label>
+            <textarea id="f-befund" placeholder="Kurze Beschreibung des klinischen Befundes, Schmerzscore NRS …" autocomplete="off"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- 05 MASSNAHMEN -->
+      <div class="ms" style="border-left-color:#C0392B;">
+        <div class="ms-head"><span class="ms-num" style="color:#C0392B;">05</span><span class="ms-title">Durchgeführte Maßnahmen</span></div>
+        <div class="ms-body">
+          <div class="m-row">
+            <div class="m-grp">
+              <div class="m-grp-lbl rot">Kreislauf &amp; Blut</div>
+              <div class="cg-lg m-col" style="margin-top:5px;">
+                <label class="ci-lg"><input type="checkbox" id="cb-reani"> Reanimation / AED</label>
+                <label class="ci-lg"><input type="checkbox" id="cb-iv"> Venenzugang i.v.</label>
+                <label class="ci-lg"><input type="checkbox" id="cb-io"> i.o.-Zugang</label>
+                <label class="ci-lg"><input type="checkbox" id="cb-inf"> Infusion</label>
+                <label class="ci-lg"><input type="checkbox" id="cb-bluts"> Blutst. / Druckverband</label>
+                <label class="ci-lg"><input type="checkbox" id="cb-tourni"> Tourniquet</label>
+                <label class="ci-lg"><input type="checkbox" id="cb-becken"> Beckenschlinge</label>
+              </div>
+            </div>
+            <div class="m-sep"></div>
+            <div class="m-grp">
+              <div class="m-grp-lbl blau">Atmung &amp; Monitoring</div>
+              <div class="cg-lg m-col" style="margin-top:5px;">
+                <label class="ci-lg"><input type="checkbox" id="cb-o2"> O2-Gabe / Sauerstoff</label>
+                <label class="ci-lg"><input type="checkbox" id="cb-aw"> Atemwegssicherung</label>
+                <label class="ci-lg"><input type="checkbox" id="cb-intub"> Intubation</label>
+                <label class="ci-lg"><input type="checkbox" id="cb-beat"> Beatmung</label>
+                <label class="ci-lg"><input type="checkbox" id="cb-td"> Thoraxdrainage</label>
+                <label class="ci-lg"><input type="checkbox" id="cb-mon"> Monitoring / EKG</label>
+              </div>
+            </div>
+            <div class="m-sep"></div>
+            <div class="m-grp">
+              <div class="m-grp-lbl gruen">Versorgung &amp; Sonstiges</div>
+              <div class="cg-lg m-col" style="margin-top:5px;">
+                <label class="ci-lg"><input type="checkbox" id="cb-wund"> Wundversorgung</label>
+                <label class="ci-lg"><input type="checkbox" id="cb-hws2"> HWS-Immobilisation</label>
+                <label class="ci-lg"><input type="checkbox" id="cb-immo"> Immobilisation</label>
+                <label class="ci-lg"><input type="checkbox" id="cb-waerme"> Wärmeerhalt</label>
+                <label class="ci-lg"><input type="checkbox" id="cb-analg"> Analgesie</label>
+                <label class="ci-lg"><input type="checkbox" id="cb-psych"> Psych. Betreuung</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Medikamentengabe — exakt wie Protokoll -->
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--m-g4);">Medikamentengabe</div>
+            <table class="vt">
+              <thead><tr>
+                <th style="width:30%">Medikament / Dosis</th>
+                <th style="width:28%">Applikation</th>
+                <th style="width:20%">Uhrzeit</th>
+                <th style="width:22%">Verabreicher</th>
+              </tr></thead>
+              <tbody id="med-tbody"></tbody>
+            </table>
+            <button class="btn-add-row" onclick="addMedRow()">+ Zeile hinzufügen</button>
+          </div>
+
+          <div class="f"><label>Weitere Maßnahmen / Besonderheiten</label>
+            <textarea id="f-massn-extra" placeholder="Freitext …" style="min-height:40px;" autocomplete="off"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- 06 TRANSPORT -->
+      <div class="ms" style="border-left-color:#1A7A5E;">
+        <div class="ms-head"><span class="ms-num" style="color:#1A7A5E;">06</span><span class="ms-title">Transport &amp; Übergabe</span></div>
+        <div class="ms-body">
+          <div class="g4">
+            <div class="f"><label>Transportmittel</label>
+              <select id="f-transport"><option value="">—</option><option>RTW</option><option>NEF/RTW</option><option>ITW</option><option>RTH</option><option>KTW</option><option>NAW</option><option>Polizei</option><option>Eigenanreise</option><option>Vor Ort verblieben</option></select>
+            </div>
+            <div class="f"><label>Schockraum-Voranmeldung</label>
+              <select id="f-schockraum"><option value="">—</option><option>Ja</option><option>Nein</option><option>Nicht erforderlich</option></select>
+            </div>
+            <div class="f c2"><label>Transport-Ziel Krankenhaus</label><input type="text" id="f-kh" placeholder="z.B. Klinikum Muster, Notaufnahme" autocomplete="off"></div>
+            <div class="f"><label>Abfahrtszeit</label>
+              <div class="tc"><input type="text" id="f-transportzeit" placeholder="HH:MM" autocomplete="off"><button class="btn-now" onclick="setNow('f-transportzeit')">⏱ Zeit</button></div>
+            </div>
+          </div>
+          <div class="f"><label>Übergabebericht / Bemerkungen</label>
+            <textarea id="f-bemerk" placeholder="Übergabebericht, Hinweise für das Krankenhaus …" autocomplete="off"></textarea>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /modal-body -->
+
+    <div class="modal-footer">
+      <button class="mbtn" onclick="closeModal()">Abbrechen</button>
+      <button class="mbtn pri" onclick="savePatient()">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ══ CAT META ══ */
+const CAT = {
+  I:   {color:'#e63946',bg:'rgba(230,57,70,.14)',  label:'Sofort',      roman:'I'},
+  II:  {color:'#f4a261',bg:'rgba(244,162,97,.11)', label:'Dringend',    roman:'II'},
+  III: {color:'#52b788',bg:'rgba(82,183,136,.11)', label:'Nicht Dringl.',roman:'III'},
+  IV:  {color:'#4895ef',bg:'rgba(72,149,239,.1)',  label:'Abwartend',   roman:'IV'},
+  X:   {color:'#555e6e',bg:'rgba(85,94,110,.14)',  label:'Verstorben',  roman:'X'},
+};
+const CB_MAP = {
+  'cb-poly':'Polytrauma','cb-sht':'SHT','cb-thorax':'Thoraxtrauma',
+  'cb-abdo':'Abdominaltrauma','cb-hws':'HWS-Trauma','cb-amp':'Amputation',
+  'cb-frak':'Fraktur','cb-verb':'Verbrennung','cb-blut':'Starke Blutung',
+  'cb-reani':'Reanimation/AED','cb-iv':'Venenzugang i.v.','cb-io':'i.o.-Zugang',
+  'cb-inf':'Infusion','cb-bluts':'Blutstillung','cb-tourni':'Tourniquet','cb-becken':'Beckenschlinge',
+  'cb-o2':'O2-Gabe','cb-aw':'Atemwegssicherung','cb-intub':'Intubation','cb-beat':'Beatmung',
+  'cb-td':'Thoraxdrainage','cb-mon':'Monitoring/EKG',
+  'cb-wund':'Wundversorgung','cb-hws2':'HWS-Immob.','cb-immo':'Immobilisation',
+  'cb-waerme':'Wärmeerhalt','cb-analg':'Analgesie','cb-psych':'Psych.Betreuung'
+};
+const TXT_IDS = ['f-name','f-dob','f-fundort','f-findtime','f-puls','f-rr','f-spo2','f-hauptv','f-befund','f-massn-extra','f-kh','f-transportzeit','f-bemerk'];
+const SEL_IDS = ['f-sex','f-atemweg','f-atmung','f-kreislauf','f-gcs','f-mech','f-transport','f-schockraum'];
+const MED_OPTS = '<option value="">—</option><option>Intravenöser Zugang (I.V.)</option><option>Intraossärer Zugang (I.O.)</option><option>Oral (p.o.)</option><option>Inhalativ</option><option>Subkutan (s.c.)</option>';
+
+/* ══ STATE ══ */
+let patients=[], editId=null, catF='all', transF='all', selCatVal=null, isDone=false, patN=0;
+
+/* ══ CLOCK ══ */
+(function tick(){
+  const n=new Date(),p=x=>String(x).padStart(2,'0');
+  const el=document.getElementById('eb-clock');
+  if(el)el.textContent=p(n.getHours())+':'+p(n.getMinutes())+':'+p(n.getSeconds());
+  setTimeout(tick,1000);
+})();
+
+function setNow(id){
+  const el=document.getElementById(id);if(!el)return;
+  const n=new Date();
+  el.value=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+  el.focus();
+}
+function setNowMed(btn){
+  const i=btn.previousElementSibling;if(!i)return;
+  const n=new Date();
+  i.value=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+  i.focus();
+}
+
+/* ══ MED TABLE ══ */
+function makeMedRow(med,app,time,name){
+  const tr=document.createElement('tr');
+  tr.innerHTML=
+    '<td><input type="text" value="'+(med||'')+'" placeholder="Morphin 5mg" autocomplete="off"></td>'+
+    '<td><select class="vt-select">'+MED_OPTS+'</select></td>'+
+    '<td><div class="vt-tc"><input type="text" value="'+(time||'')+'" placeholder="HH:MM" autocomplete="off"><button class="btn-now" onclick="setNowMed(this)">⏱</button></div></td>'+
+    '<td><input type="text" value="'+(name||'')+'" placeholder="Name" autocomplete="off"></td>';
+  if(app)tr.querySelector('select').value=app;
+  return tr;
+}
+function resetMed(){
+  const tb=document.getElementById('med-tbody');if(!tb)return;
+  tb.innerHTML='';
+  tb.appendChild(makeMedRow('','','',''));
+  tb.appendChild(makeMedRow('','','',''));
+}
+function addMedRow(){
+  const tb=document.getElementById('med-tbody');if(!tb)return;
+  tb.appendChild(makeMedRow('','','',''));
+}
+function readMed(){
+  const rows=[];
+  document.querySelectorAll('#med-tbody tr').forEach(tr=>{
+    const ins=tr.querySelectorAll('input[type="text"]');
+    const sel=tr.querySelector('select');
+    const med=ins[0]?ins[0].value.trim():'';
+    const app=sel?sel.value:'';
+    const time=ins[1]?ins[1].value.trim():'';
+    const name=ins[2]?ins[2].value.trim():'';
+    if(med||app||time||name)rows.push({med,app,time,name});
+  });
+  return rows;
+}
+function loadMed(rows){
+  const tb=document.getElementById('med-tbody');if(!tb)return;
+  tb.innerHTML='';
+  if(!rows||!rows.length){resetMed();return;}
+  rows.forEach(r=>tb.appendChild(makeMedRow(r.med,r.app,r.time,r.name)));
+  if(rows.length<2)for(let i=rows.length;i<2;i++)tb.appendChild(makeMedRow('','','',''));
+}
+
+/* ══ DONE TOGGLE ══ */
+function setDoneUI(val){
+  isDone=!!val;
+  const btn=document.getElementById('done-toggle');
+  const lbl=document.getElementById('done-label');
+  if(isDone){
+    btn.style.background='rgba(82,183,136,.12)';btn.style.borderColor='#52b788';btn.style.color='#52b788';
+    lbl.textContent='Abtransportiert ✓';
+  } else {
+    btn.style.background='';btn.style.borderColor='';btn.style.color='';
+    lbl.textContent='Nicht abtransportiert';
+  }
+}
+function toggleDone(){setDoneUI(!isDone);}
+
+/* ══ MODAL ══ */
+function openNew(){
+  editId=null;selCatVal=null;
+  clearF();setDoneUI(false);
+  document.getElementById('modal-title').innerHTML='Neuer <span>Patient</span>';
+  document.getElementById('modal-sub').textContent='MANV · Triage · Dokumentation';
+  document.getElementById('btn-exp-single').style.display='none';
+  document.getElementById('modal-stripe').style.background='#1e2a3a';
+  document.getElementById('modal-overlay').classList.add('open');
+  document.querySelector('.modal-body').scrollTop=0;
+}
+function openEdit(id){
+  const p=patients.find(x=>x.id===id);if(!p)return;
+  editId=id;selCatVal=p.cat;
+  loadF(p);setDoneUI(p.done||false);
+  document.getElementById('modal-title').innerHTML='Patient <span>#'+pad(p.num)+'</span>';
+  document.getElementById('modal-sub').textContent=p.name||'Unbekannt';
+  document.getElementById('btn-exp-single').style.display='flex';
+  document.getElementById('modal-stripe').style.background=p.cat?CAT[p.cat].color:'#1e2a3a';
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open');editId=null;}
+function overlayClick(e){if(e.target===document.getElementById('modal-overlay'))closeModal();}
+function selCat(c){
+  selCatVal=c;
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('sel'));
+  document.getElementById('cb-cat-'+c).classList.add('sel');
+  document.getElementById('modal-stripe').style.background=CAT[c].color;
+}
+
+/* ══ FORM R/W ══ */
+function clearF(){
+  TXT_IDS.forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  SEL_IDS.forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  Object.keys(CB_MAP).forEach(id=>{const el=document.getElementById(id);if(el)el.checked=false;});
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('sel'));
+  resetMed();
+}
+function loadF(p){
+  TXT_IDS.forEach(id=>{const el=document.getElementById(id);if(el)el.value=p[id]||'';});
+  SEL_IDS.forEach(id=>{const el=document.getElementById(id);if(el)el.value=p[id]||'';});
+  Object.keys(CB_MAP).forEach(id=>{const el=document.getElementById(id);if(el)el.checked=(p.checks||[]).includes(id);});
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('sel'));
+  if(p.cat){const cb=document.getElementById('cb-cat-'+p.cat);if(cb)cb.classList.add('sel');}
+  loadMed(p.medRows||[]);
+}
+function readF(){
+  const gv=id=>{const el=document.getElementById(id);return el?el.value.trim():'';};
+  const checks=Object.keys(CB_MAP).filter(id=>{const el=document.getElementById(id);return el&&el.checked;});
+  const obj={cat:selCatVal,checks,done:isDone};
+  TXT_IDS.forEach(id=>obj[id]=gv(id));
+  SEL_IDS.forEach(id=>obj[id]=gv(id));
+  obj.medRows=readMed();
+  obj.name=obj['f-name'];obj.dob=obj['f-dob'];obj.sex=obj['f-sex'];
+  obj.fundort=obj['f-fundort'];obj.findtime=obj['f-findtime'];
+  obj.puls=obj['f-puls'];obj.rr=obj['f-rr'];obj.spo2=obj['f-spo2'];
+  obj.gcs=obj['f-gcs'];obj.hauptv=obj['f-hauptv'];obj.befund=obj['f-befund'];
+  obj.massnahmen=checks.map(id=>CB_MAP[id]);
+  return obj;
+}
+function savePatient(){
+  if(!selCatVal){toast('Bitte Triage-Kategorie wählen!','err');return;}
+  const data=readF();
+  const ts=stamp();
+  if(editId){
+    const idx=patients.findIndex(p=>p.id===editId);
+    if(idx>=0)patients[idx]={...patients[idx],...data,updatedAt:ts};
+    toast('Patient aktualisiert','ok');
+  } else {
+    patN++;
+    patients.push({id:uid(),num:patN,createdAt:ts,updatedAt:ts,...data});
+    toast('Patient erfasst','ok');
+  }
+  closeModal();render();
+}
+
+/* ══ QUICK DONE TOGGLE (card button) ══ */
+function quickDone(id,e){
+  e.stopPropagation();
+  const idx=patients.findIndex(p=>p.id===id);if(idx<0)return;
+  patients[idx].done=!patients[idx].done;
+  render();
+  toast(patients[idx].done?'Abtransportiert ✓':'Zurückgesetzt','ok');
+}
+
+/* ══ FILTER ══ */
+function setCat(v){
+  catF=v;
+  document.querySelectorAll('[id^="ftab-cat-"]').forEach(t=>t.classList.remove('active'));
+  document.getElementById('ftab-cat-'+v).classList.add('active');
+  render();
+}
+function setTrans(v){
+  transF=v;
+  document.querySelectorAll('[id^="ftab-tr-"]').forEach(t=>t.classList.remove('active'));
+  document.getElementById('ftab-tr-'+v).classList.add('active');
+  render();
+}
+function filtered(){
+  const q=(document.getElementById('search-inp')||{}).value||'';
+  const ql=q.toLowerCase().trim();
+  return patients.filter(p=>{
+    if(catF!=='all'&&p.cat!==catF)return false;
+    if(transF==='done'&&!p.done)return false;
+    if(transF==='open'&&p.done)return false;
+    if(ql&&!(p.name||'').toLowerCase().includes(ql))return false;
+    return true;
+  });
+}
+
+/* ══ RENDER ══ */
+function render(){
+  updateStats();
+  const list=document.getElementById('plist');
+  list.innerHTML='';
+  const vis=filtered();
+  const empty=document.getElementById('empty-state');
+  const grid=document.getElementById('grid-view');
+  if(!patients.length){empty.style.display='flex';grid.style.display='none';}
+  else{empty.style.display='none';grid.style.display='grid';}
+  vis.forEach(p=>{
+    const m=p.cat?CAT[p.cat]:{color:'var(--dim)',label:'?',roman:'?',bg:'transparent'};
+    const li=document.createElement('div');
+    li.className='pl-item'+(p.done?' is-done':'');
+    li.onclick=()=>openEdit(p.id);
+    li.innerHTML=
+      '<div class="pl-bar" style="background:'+(p.done?'var(--grn)':m.color)+'"></div>'+
+      '<div class="pl-info">'+
+        '<div class="pl-num">#'+pad(p.num)+'</div>'+
+        '<div class="pl-name '+(p.name?'':'unk')+'">'+(p.name||'Unbekannt')+'</div>'+
+        '<div class="pl-sub">'+(p.fundort||'—')+' · '+(p.createdAt||'')+'</div>'+
+      '</div>'+
+      (p.done
+        ? '<span class="pl-badge" style="background:rgba(82,183,136,.12);color:var(--grn);border:1px solid rgba(82,183,136,.3)">✓ Trans.</span>'
+        : '<span class="pl-badge" style="background:'+m.bg+';color:'+m.color+';border:1px solid '+m.color+'33">'+m.roman+'</span>');
+    list.appendChild(li);
+  });
+  grid.innerHTML='';
+  vis.forEach(p=>grid.appendChild(buildCard(p)));
+}
+
+function buildCard(p){
+  const m=p.cat?CAT[p.cat]:{color:'var(--dim)',bg:'transparent',label:'?',roman:'?'};
+  const card=document.createElement('div');
+  card.className='pat-card'+(p.done?' done':'');
+  const tags=(p.massnahmen||[]).slice(0,3).map(t=>
+    '<span class="ptag" style="background:rgba(72,149,239,.1);color:#4895ef;border:1px solid rgba(72,149,239,.2)">'+t+'</span>'
+  ).join('');
+  const doneBar=p.done?'<div class="done-stamp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11"><polyline points="20 6 9 17 4 12"/></svg>Abtransportiert — Abgeschlossen</div>':'';
+  card.innerHTML=
+    doneBar+
+    '<div class="pat-head" onclick="openEdit(\''+p.id+'\')">'+
+      '<div class="pat-stripe" style="background:'+(p.done?'var(--grn)':m.color)+'"></div>'+
+      '<div class="pat-numbox"><div class="pat-num">'+pad(p.num)+'</div><div class="pat-num-lbl">Pat-Nr</div></div>'+
+      '<div class="pat-info">'+
+        '<div class="pat-name '+(p.name?'':'unk')+'">'+(p.name||'Unbekannt')+'</div>'+
+        '<div class="pat-dob">'+[p.dob,p.sex,p.fundort].filter(Boolean).join(' · ')+'</div>'+
+      '</div>'+
+      '<div class="pat-catbox" style="background:'+m.bg+'">'+
+        '<div class="pat-roman" style="color:'+(p.done?'var(--grn)':m.color)+'">'+m.roman+'</div>'+
+        '<div class="pat-cat-lbl" style="color:'+(p.done?'var(--grn)':m.color)+'">'+m.label+'</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="pat-body">'+
+      '<div class="pat-vitals">'+
+        '<div class="vc"><div class="vc-l">GCS</div><div class="vc-v">'+(p.gcs||'—')+'</div></div>'+
+        '<div class="vc"><div class="vc-l">SpO₂</div><div class="vc-v">'+(p.spo2?p.spo2+'%':'—')+'</div></div>'+
+        '<div class="vc"><div class="vc-l">Puls</div><div class="vc-v">'+(p.puls?p.puls+'/min':'—')+'</div></div>'+
+        '<div class="vc"><div class="vc-l">RR</div><div class="vc-v">'+(p.rr||'—')+'</div></div>'+
+      '</div>'+
+      '<div class="pat-diag '+((!p.hauptv&&!p.befund)?'empty':'')+'">'+
+        (p.hauptv?'<b style="color:var(--white)">'+p.hauptv+'</b>'+(p.befund?' — ':''):'')+
+        (p.befund||(p.hauptv?'':'Keine Beschreibung erfasst'))+
+      '</div>'+
+    '</div>'+
+    '<div class="pat-foot">'+
+      '<div class="pat-ftime">'+(p.findtime?'⏱ '+p.findtime:'')+' '+(p.createdAt?'· '+p.createdAt:'')+'</div>'+
+      '<div class="pat-tags">'+tags+((p.massnahmen||[]).length>3?'<span class="ptag" style="background:var(--sf3);color:var(--dim)">+'+(p.massnahmen.length-3)+'</span>':'')+'</div>'+
+      '<div class="pat-actions">'+
+        (p.done
+          ?'<button class="cbtn undo-btn" onclick="quickDone(\''+p.id+'\',event)">↺ Aktiv</button>'
+          :'<button class="cbtn done-btn" onclick="quickDone(\''+p.id+'\',event)">✓ Abtr.</button>')+
+        '<button class="cbtn" onclick="event.stopPropagation();exportById(\''+p.id+'\')">↓</button>'+
+        '<button class="cbtn" onclick="event.stopPropagation();delPat(\''+p.id+'\')" style="color:var(--red)">✕</button>'+
+        '<button class="cbtn" onclick="openEdit(\''+p.id+'\')">Bearbeiten</button>'+
+      '</div>'+
+    '</div>';
+  return card;
+}
+
+function updateStats(){
+  const c={I:0,II:0,III:0,IV:0,X:0};
+  let done=0,open=0;
+  patients.forEach(p=>{
+    if(p.cat&&c[p.cat]!==undefined)c[p.cat]++;
+    if(p.done)done++;else open++;
+  });
+  const s=id=>document.getElementById(id);
+  s('fc-all').textContent=patients.length;
+  s('fc-I').textContent=c.I; s('fc-II').textContent=c.II;
+  s('fc-III').textContent=c.III; s('fc-IV').textContent=c.IV; s('fc-X').textContent=c.X;
+  s('fc-tr-all').textContent=patients.length;
+  s('fc-tr-open').textContent=open;
+  s('fc-tr-done').textContent=done;
+  // Broadcast to parent (index.html)
+  try{window.parent.postMessage({type:'manv-stats',total:patients.length,I:c.I,II:c.II,III:c.III,IV:c.IV,X:c.X},'*');}catch(e){}
+}
+
+/* ══ EXPORT / IMPORT ══ */
+function meta(){return{einsatz:gv('eb-einsatz'),elw:gv('eb-elw'),orgl:gv('eb-orgl'),alarm:gv('eb-alarm'),at:new Date().toLocaleString('de-DE')};}
+function gv(id){const el=document.getElementById(id);return el?el.value:'';}
+function exportAll(){
+  if(!patients.length){toast('Keine Patienten','err');return;}
+  dl({version:1,type:'manv-full',meta:meta(),patN,patients},'MANV_'+sf(gv('eb-einsatz')||'Einsatz')+'_alle.manv');
+  toast(patients.length+' Patienten exportiert','ok');
+}
+function exportSingle(){if(editId)exportById(editId);}
+function exportById(id){
+  const p=patients.find(x=>x.id===id);if(!p)return;
+  dl({version:1,type:'manv-single',meta:meta(),patients:[p]},'MANV_Pat_'+pad(p.num)+'_Kat'+(p.cat||'?')+'_'+sf(p.name||'Unbekannt')+'.manv');
+  toast('Patient #'+pad(p.num)+' exportiert','ok');
+}
+function dl(obj,fn){
+  const b=new Blob([JSON.stringify(obj,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fn;a.click();URL.revokeObjectURL(a.href);
+}
+function importData(input){
+  const file=input.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=e=>{try{const d=JSON.parse(e.target.result);if(!d.version||!d.patients)throw 0;doImport(d);}catch(e){toast('Ungültige Datei','err');}};
+  r.readAsText(file);input.value='';
+}
+function doImport(data){
+  const cnt=data.patients.length;
+  if(data.type==='manv-full'){
+    if(!confirm('Vollständigen Import?\n\n'+patients.length+' aktuelle → '+cnt+' importierte Patienten ersetzen.'))return;
+    patients=data.patients;patN=data.patN||Math.max(0,...patients.map(p=>p.num||0));
+    if(data.meta){const sv=(id,v)=>{const el=document.getElementById(id);if(el&&v)el.value=v;};
+      sv('eb-einsatz',data.meta.einsatz);sv('eb-elw',data.meta.elw);sv('eb-orgl',data.meta.orgl);sv('eb-alarm',data.meta.alarm);}
+  } else {
+    data.patients.forEach(np=>{const i=patients.findIndex(p=>p.id===np.id);if(i>=0)patients[i]=np;else{patN=Math.max(patN,np.num||0);patients.push(np);}});
+  }
+  toast(cnt+' Patient(en) importiert','ok');render();
+}
+function delPat(id){if(!confirm('Patient löschen?'))return;patients=patients.filter(p=>p.id!==id);render();toast('Gelöscht','ok');}
+function confirmClearAll(){if(!patients.length){toast('Keine Patienten','err');return;}if(!confirm('Alle '+patients.length+' Patienten löschen?\nNicht rückgängig!'))return;patients=[];patN=0;render();toast('Alle gelöscht','ok');}
+
+/* ══ UTILS ══ */
+function uid(){return'p_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);}
+function pad(n){return String(n).padStart(3,'0');}
+function stamp(){const n=new Date();return String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');}
+function sf(s){return(s||'').replace(/[^a-zA-Z0-9_\-]/g,'_').slice(0,40);}
+function toast(msg,type){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show'+(type?' '+type:'');
+  setTimeout(()=>t.className='toast',2600);
+}
+
+/* ══ POSTMESSAGE ══ */
+window.addEventListener('message',e=>{
+  const d=e.data;if(!d||d.target!=='manv')return;
+  if(d.fn==='openNewPatient')openNew();
+  if(d.fn==='exportAll')exportAll();
+  if(d.fn==='doPrint')window.print();
+  if(d.fn==='confirmClearAll')confirmClearAll();
+  if(d.fn==='importFromParent'&&d.arg){try{doImport(JSON.parse(d.arg));}catch(e){toast('Ungültige Datei','err');}}
+});
+
+/* ══ INIT ══ */
+resetMed();
+render();
+</script>
+</body>
+</html>
