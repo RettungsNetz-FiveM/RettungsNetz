@@ -168,7 +168,7 @@ header {
 }
 .nav-icon { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; }
 .nav-icon svg { width: 19px; height: 19px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-.nav-label { font-family: var(--mono); font-size: 6.5px; letter-spacing: 1px; color: inherit; text-transform: uppercase; text-align: center; line-height: 1.2; }
+.nav-label { font-family: var(--mono); font-size: 9px; letter-spacing: 1px; color: inherit; text-transform: uppercase; text-align: center; line-height: 1.2; }
 
 /* ════════════════════════════════
    VIEWS
@@ -284,6 +284,17 @@ header {
     <!-- ── MANV toolbar ── -->
     <div class="toolbar-panel" id="tb-manv">
       <div class="tb-sep"></div>
+      <!-- Online-Mode Toggle -->
+      <button class="hbtn" id="manv-mode-btn" onclick="manvToggleMode()">
+        <span id="manv-mode-dot" style="width:7px;height:7px;border-radius:50%;background:var(--dim);flex-shrink:0;display:inline-block;"></span>
+        <span id="manv-mode-lbl">Lokaler Modus</span>
+      </button>
+      <!-- Participant Stats -->
+      <div id="manv-stats-pill" style="display:flex;align-items:center;gap:8px;padding:0 10px;height:30px;border:1px solid var(--bd);border-radius:3px;background:var(--sf2);">
+        <span style="font-family:var(--mono);font-size:8px;letter-spacing:1px;color:var(--dim);text-transform:uppercase;">Teilnehmer</span>
+        <span id="manv-user-count" style="font-family:var(--mono);font-size:12px;color:var(--txt);">—</span>
+      </div>
+      <div class="tb-sep"></div>
       <button class="hbtn pri" onclick="manvSend('openNewPatient')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Neuer Patient
@@ -305,7 +316,7 @@ header {
         Drucken
       </button>
       <div class="tb-sep"></div>
-      <button class="hbtn danger" onclick="manvSend('confirmClearAll')">
+      <button class="hbtn danger" id="manv-clear-btn" onclick="manvSend('confirmClearAll')" title="Im Online-Modus deaktiviert">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
         Alle löschen
       </button>
@@ -512,13 +523,6 @@ header {
       <div style="max-width:800px;">
         <div style="font-family:var(--mono);font-size:8px;letter-spacing:3px;color:var(--red);text-transform:uppercase;margin-bottom:14px;">System · Info</div>
         <div style="font-family:var(--cond);font-size:36px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--white);margin-bottom:20px;line-height:1;">Rettungs<em style="color:var(--red);font-style:normal;">Netz</em></div>
-        <div style="border:1px solid var(--bd);background:var(--sf);padding:20px 22px;margin-bottom:12px;">
-          <div style="font-family:var(--mono);font-size:8px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;margin-bottom:8px;">Module</div>
-          <div style="font-size:16px;color:var(--txt);line-height:1.7;font-weight:300;">
-            <b style="color:var(--white);font-weight:500;">Einsatz-Protokoll</b> — Vollständige Einsatzdokumentation mit Patientendaten, Vitalwerten, Maßnahmen und Übergabebericht. PDF-Export integriert.<br><br>
-            <b style="color:var(--white);font-weight:500;">Fahrzeug-Planer</b> — Interaktiver Lageplan. Fahrzeuge per Drag &amp; Drop positionieren, Stellplätze definieren, Plan als Bild exportieren.
-          </div>
-        </div>
         <div style="border:1px solid var(--bd);background:var(--sf);padding:20px 22px;">
           <div style="font-family:var(--mono);font-size:8px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;margin-bottom:8px;">Hinweis &amp; Copyright</div>
           <div style="font-size:15px;color:var(--txt2);line-height:1.6;font-weight:300;">
@@ -667,6 +671,10 @@ window.addEventListener('message', e => {
     if (s('idx-manv-III'))   s('idx-manv-III').textContent   = d.III   || 0;
     if (s('idx-manv-IVX'))   s('idx-manv-IVX').textContent   = (d.IV||0)+(d.X||0);
   }
+  // MANV mode change (online/offline + user count)
+  if (d.type === 'manv-mode') {
+    manvUpdateModeUI(d.online, d.users);
+  }
   // Protokoll meldet Dateinamen — Titel setzen, nach Druck wiederherstellen
   if (d.type === 'proto-filename' && d.fileName) {
     const origTitle = document.title;
@@ -700,6 +708,39 @@ function manvImportFile(input) {
   };
   reader.readAsText(file);
   input.value = '';
+}
+
+// ── MANV Online-Mode Toggle ──
+function manvToggleMode() {
+  manvSend('toggleMode');
+}
+function manvUpdateModeUI(online, users) {
+  const btn  = document.getElementById('manv-mode-btn');
+  const dot  = document.getElementById('manv-mode-dot');
+  const lbl  = document.getElementById('manv-mode-lbl');
+  const cnt  = document.getElementById('manv-user-count');
+  const pill = document.getElementById('manv-stats-pill');
+  const clr  = document.getElementById('manv-clear-btn');
+  if (online) {
+    dot.style.background = '#52b788';
+    dot.style.boxShadow  = '0 0 5px rgba(82,183,136,.7)';
+    lbl.textContent = '🔥 Online — Aktiv';
+    btn.style.cssText = 'font-family:var(--mono);font-size:10px;letter-spacing:1px;padding:0 11px;height:30px;border:1px solid #52b788;background:#0d2a1a;color:#52b788;cursor:pointer;border-radius:3px;text-transform:uppercase;transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:5px;flex-shrink:0;';
+    pill.style.borderColor = 'rgba(82,183,136,.3)';
+    cnt.style.color = '#52b788';
+    cnt.textContent = users !== undefined ? users : '—';
+    // Disable "Alle löschen" in online mode
+    if (clr) { clr.disabled = true; clr.style.opacity = '.3'; clr.title = 'Im Online-Modus deaktiviert'; }
+  } else {
+    dot.style.background = 'var(--dim)';
+    dot.style.boxShadow  = 'none';
+    lbl.textContent = 'Lokaler Modus';
+    btn.style.cssText = '';
+    pill.style.borderColor = 'var(--bd)';
+    cnt.style.color = 'var(--txt)';
+    cnt.textContent = '—';
+    if (clr) { clr.disabled = false; clr.style.opacity = '1'; clr.title = ''; }
+  }
 }
 </script>
 </body>
