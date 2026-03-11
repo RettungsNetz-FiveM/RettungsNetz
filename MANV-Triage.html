@@ -539,27 +539,18 @@ async function fbDel(path){
   if(!r.ok) throw new Error('DEL '+path+' → '+r.status);
 }
 
-// SSE listener — Firebase supports ?stream=true for realtime updates
-let ssePatients = null;
-let ssePresence = null;
-let sseLocks    = null;
-
+// SSE listener — Firebase supports ?accept=text/event-stream for realtime
 function fbListen(path, onData){
   const url = FB_BASE + path + '.json?stream=true';
   const es = new EventSource(url);
   es.addEventListener('put', e => {
     try{
       const msg = JSON.parse(e.data);
-      onData(msg.data);
+      // Only process root-level puts (full dataset), ignore sub-path updates
+      if(msg.path === '/') onData(msg.data);
     }catch(err){}
   });
-  es.addEventListener('patch', e => {
-    try{
-      const msg = JSON.parse(e.data);
-      onData(msg.data, true); // partial patch
-    }catch(err){}
-  });
-  es.onerror = () => {}; // silent reconnect
+  es.onerror = () => {};
   return es;
 }
 function fbUnlisten(es){
@@ -622,24 +613,19 @@ async function doConnect(){
 
     // Register presence
     await fbSet('/manv/presence/'+MY_ID, {at: Date.now()});
-    // Best-effort cleanup on page unload
+
+    // Cleanup presence on page close — fetch with keepalive is reliable
     window.addEventListener('beforeunload', ()=>{
-      navigator.sendBeacon(FB_BASE+'/manv/presence/'+MY_ID+'.json', 'null');
+      fetch(FB_BASE+'/manv/presence/'+MY_ID+'.json', {method:'DELETE', keepalive:true});
     }, {once:true});
 
-    // SSE: watch patients
-    sseP = fbListen('/manv/patients', (data, patch) => {
+    isOnline = true;
+
+    // SSE: watch patients — only react to full root puts
+    sseP = fbListen('/manv/patients', (data) => {
       if(data === null){ patients=[]; patN=0; }
-      else if(patch){
-        // Partial update — merge into patients
-        if(data) Object.keys(data).forEach(id=>{
-          const i=patients.findIndex(p=>p.id===id);
-          if(data[id]===null){ patients=patients.filter(p=>p.id!==id); }
-          else if(i>=0){ patients[i]={...patients[i],...data[id]}; }
-          else{ patients.push(data[id]); patients.sort((a,b)=>(a.num||0)-(b.num||0)); }
-        });
-      } else {
-        patients = data ? Object.values(data).sort((a,b)=>(a.num||0)-(b.num||0)) : [];
+      else {
+        patients = Object.values(data).sort((a,b)=>(a.num||0)-(b.num||0));
         patN = patients.reduce((m,p)=>Math.max(m,p.num||0),0);
       }
       render();
@@ -652,19 +638,17 @@ async function doConnect(){
       updateModalLockWarning();
     });
 
-    // SSE: watch presence count in realtime
-    const ssePresence = fbListen('/manv/presence', (data) => {
+    // SSE: watch presence count
+    window._ssePresence = fbListen('/manv/presence', (data) => {
       const n = data ? Object.keys(data).length : 0;
       notifyParentMode(n);
     });
-    // store so we can close it on goOffline
-    window._ssePresence = ssePresence;
 
-    isOnline = true;
     toast('🔥 Online! Live-Sync aktiv.','ok');
     notifyParentMode(1);
   }catch(e){
     console.error(e);
+    isOnline = false;
     toast('Verbindungsfehler: '+e.message,'err');
     goOffline(true);
   }
@@ -675,8 +659,8 @@ function goOffline(silent=false){
   fbUnlisten(sseP); sseP=null;
   fbUnlisten(sseL); sseL=null;
   fbUnlisten(window._ssePresence); window._ssePresence=null;
-  // Remove presence
-  try{ fbDel('/manv/presence/'+MY_ID); }catch(e){}
+  // Remove presence synchronously
+  fetch(FB_BASE+'/manv/presence/'+MY_ID+'.json', {method:'DELETE', keepalive:true}).catch(()=>{});
   isOnline=false; editingLocks={};
   if(!silent) toast('Lokaler Modus aktiv','info');
   notifyParentMode(0);
@@ -722,7 +706,8 @@ async function dbSet(p){
 }
 async function dbPushRealtimeFields(p){
   if(!isOnline)return;
-  try{ await fbPatch('/manv/patients/'+p.id, {cat:p.cat||null,done:p.done||false,updatedAt:p.updatedAt}); }catch(e){toast('Sync-Fehler','err');}
+  // Write full patient so SSE root-listener gets a clean complete object
+  try{ await fbSet('/manv/patients/'+p.id, p); }catch(e){toast('Sync-Fehler','err');}
 }
 async function dbDel(id){
   if(!isOnline)return;
