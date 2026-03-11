@@ -666,21 +666,20 @@ async function pollAll(){
    ═══════════════════════════════════════════════════════════ */
 async function acquireEditLock(pid){
   if(!isOnline || !pid) return;
-  try {
-    await fbPut('/manv/editing/' + pid, MY_ID);
-    // Sofort poll damit andere User den Lock sofort sehen (nicht erst nach 2s)
-    await pollAll();
-  } catch(e){}
+  // Sofort lokal setzen → render() zeigt Lock augenblicklich
+  editingLocks[pid] = MY_ID;
+  // Wir wollen NICHT unsere eigene Karte sperren — isLockedByOther prüft !== MY_ID
+  // also bleibt die Karte für uns selbst bedienbar, für andere gesperrt
+  try { await fbPut('/manv/editing/' + pid, MY_ID); } catch(e){}
 }
+
 async function releaseEditLock(pid){
   if(!isOnline || !pid) return;
-  try {
-    if(editingLocks[pid] === MY_ID) {
-      await fbDel('/manv/editing/' + pid);
-      // Sofort poll damit andere User den freigegeben Lock sofort sehen
-      await pollAll();
-    }
-  } catch(e){}
+  if(editingLocks[pid] !== MY_ID) return;
+  // Sofort lokal entfernen → render() entsperrt Karte augenblicklich
+  delete editingLocks[pid];
+  render();
+  try { await fbDel('/manv/editing/' + pid); } catch(e){}
 }
 function isLockedByOther(pid){
   if(!isOnline) return false;
@@ -705,14 +704,15 @@ function updateLockBadges(){
       badge.remove();
     }
 
-    // ── FIX: "Bearbeiten"-Button sperren wenn gesperrt ────
-    const editBtn = card.querySelector('.btn-edit');
-    if(editBtn){
-      editBtn.disabled = locked;
-      editBtn.style.opacity = locked ? '0.35' : '';
-      editBtn.style.cursor  = locked ? 'not-allowed' : '';
-      editBtn.title = locked ? 'Wird von anderem Nutzer bearbeitet' : '';
-    }
+    // Alle drei Aktions-Buttons direkt patchen (ohne neu zu rendern)
+    ['.btn-transport', '.btn-delete', '.btn-edit'].forEach(sel => {
+      const btn = card.querySelector(sel);
+      if(!btn) return;
+      btn.disabled            = locked;
+      btn.style.opacity       = locked ? '0.35' : '';
+      btn.style.cursor        = locked ? 'not-allowed' : '';
+      btn.style.pointerEvents = locked ? 'none' : '';
+    });
   });
 }
 
@@ -1043,10 +1043,10 @@ function buildCard(p){
       '<div class="pat-tags">'+tags+((p.massnahmen||[]).length>3?'<span class="ptag" style="background:var(--sf3);color:var(--dim)">+'+(p.massnahmen.length-3)+'</span>':'')+'</div>'+
       '<div class="pat-actions">'+
         (p.done
-          ? '<button class="cbtn ab"'+lockAttr+' onclick="quickDone(\''+p.id+'\',event)">↺ Aktiv</button>'
-          : '<button class="cbtn gb"'+lockAttr+' onclick="quickDone(\''+p.id+'\',event)">✓ Abtr.</button>')+
+          ? '<button class="cbtn ab btn-transport"'+lockAttr+' onclick="quickDone(\''+p.id+'\',event)">↺ Aktiv</button>'
+          : '<button class="cbtn gb btn-transport"'+lockAttr+' onclick="quickDone(\''+p.id+'\',event)">✓ Abtr.</button>')+
         '<button class="cbtn" onclick="event.stopPropagation();expById(\''+p.id+'\')">↓</button>'+
-        '<button class="cbtn"'+lockAttr+' onclick="event.stopPropagation();delPat(\''+p.id+'\')" style="color:var(--red)">✕</button>'+
+        '<button class="cbtn btn-delete"'+lockAttr+' onclick="event.stopPropagation();delPat(\''+p.id+'\')" style="color:var(--red)">✕</button>'+
         '<button class="cbtn btn-edit" onclick="openEdit(\''+p.id+'\')"'+editBtnDisabled+'>Bearbeiten</button>'+
       '</div>'+
     '</div>';
