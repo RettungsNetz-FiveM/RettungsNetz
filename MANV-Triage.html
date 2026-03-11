@@ -439,65 +439,6 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:var(--sa
 </div>
 
 <!-- ══ FIREBASE SETUP DIALOG ══ -->
-<div class="dlg-ov" id="dlg-ov">
-  <div class="dlg">
-    <div class="dlg-head">
-      <div class="dlg-head-icon">🔥</div>
-      <div class="dlg-head-info">
-        <div class="dlg-head-title">Firebase Online-Modus einrichten</div>
-        <div class="dlg-head-sub">Kostenlos · 24/7 · Keine Server · Einmalige Einrichtung</div>
-      </div>
-      <button class="dbtn sec" onclick="closeDlg()" style="height:28px;padding:0 10px;font-size:8px;flex-shrink:0;">✕</button>
-    </div>
-    <div class="dlg-body">
-      <div class="step">
-        <div class="sn">1</div>
-        <div class="sc">
-          <div class="st">Firebase-Projekt erstellen (kostenlos)</div>
-          <div class="sd">Öffne die Firebase Console und erstelle ein neues Projekt. Keine Kreditkarte nötig — das Spark-Free-Tier reicht völlig aus.</div>
-          <a class="sl" href="https://console.firebase.google.com" target="_blank">→ console.firebase.google.com öffnen</a>
-          <div class="scode">1. „Projekt hinzufügen" klicken
-2. Projektname eingeben (z.B. rettungsnetz-manv)
-3. Google Analytics: Nein → Projekt erstellen</div>
-        </div>
-      </div>
-      <div class="step">
-        <div class="sn">2</div>
-        <div class="sc">
-          <div class="st">Realtime Database erstellen</div>
-          <div class="sd">Im linken Menü: <b>Build → Realtime Database → Datenbank erstellen</b><br>Region: europe-west1 (Frankfurt) → <b>Im Testmodus starten</b></div>
-          <div class="sd">Danach Regeln dauerhaft offen setzen: Realtime Database → Regeln → Folgendes einfügen &amp; veröffentlichen:</div>
-          <div class="scode">{ "rules": { ".read": true, ".write": true } }</div>
-          <div class="warn">⚠ Nur für private/fiktive Szenarien — keine echten Patientendaten!</div>
-        </div>
-      </div>
-      <div class="step">
-        <div class="sn">3</div>
-        <div class="sc">
-          <div class="st">Database URL kopieren</div>
-          <div class="sd">Realtime Database → oben die URL kopieren. Sie endet auf <b>.firebasedatabase.app</b></div>
-          <div class="scode">Beispiel: https://mein-projekt-default-rtdb.europe-west1.firebasedatabase.app</div>
-        </div>
-      </div>
-      <div class="step">
-        <div class="sn">4</div>
-        <div class="sc">
-          <div class="st">URL eingeben &amp; verbinden</div>
-          <div class="sd">URL hier einfügen — alle Geräte im Einsatz-Team müssen <b>dieselbe URL</b> eingeben, um dieselbe Session zu sehen.</div>
-          <div class="sinp-row">
-            <label>Firebase Database URL</label>
-            <input type="text" id="fb-url" placeholder="https://mein-projekt.firebasedatabase.app" autocomplete="off" spellcheck="false">
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="dlg-foot">
-      <button class="dbtn sec" onclick="closeDlg()">Abbrechen</button>
-      <button class="dbtn pri" onclick="connectFB()">🔥 Verbinden</button>
-    </div>
-  </div>
-</div>
-
 <div class="toast" id="toast"></div>
 
 <script>
@@ -512,7 +453,8 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:var(--sa
 const FB = 'https://rettungsnetz-default-rtdb.europe-west1.firebasedatabase.app';
 
 async function fbGet(path){
-  const r = await fetch(FB + path + '.json');
+  // cache:'no-store' verhindert dass der Browser alte Antworten cached
+  const r = await fetch(FB + path + '.json?_=' + Date.now(), {cache:'no-store'});
   if(!r.ok) throw new Error('GET ' + path + ' → ' + r.status);
   return r.json();
 }
@@ -593,15 +535,11 @@ window.handleModeSwitch = () => {
     if(!confirm('Online-Modus verlassen?\nDaten bleiben in Firebase gespeichert.'))return;
     goOffline();
   } else {
-    showConnectDialog();
+    doConnect();
   }
 };
-window.closeDlg   = () => document.getElementById('dlg-ov').classList.remove('open');
-window.connectFB  = () => { window.closeDlg(); doConnect(); };
-
-function showConnectDialog(){
-  document.getElementById('dlg-ov').classList.add('open');
-}
+window.closeDlg  = () => {};
+window.connectFB = () => doConnect();
 
 async function doConnect(){
   window.closeDlg();
@@ -625,16 +563,16 @@ async function doConnect(){
     if(editId) fbDel('/manv/editing/' + editId, true);
   }, {once: true});
 
-  // Sofort ersten Poll, dann alle 2s
+  // Sofort ersten Poll, dann Polling-Loop starten
   await pollAll();
-  pollTimer = setInterval(pollAll, 2000);
+  startPolling();
 
   toast('🔥 Online — Live-Sync aktiv', 'ok');
 }
 
 function goOffline(silent=false){
   isOnline = false;
-  if(pollTimer){ clearInterval(pollTimer); pollTimer = null; }
+  stopPolling();
   if(editId) releaseEditLock(editId);
   fbDel('/manv/presence/' + MY_ID, true).catch(()=>{});
   editingLocks = {};
@@ -643,10 +581,22 @@ function goOffline(silent=false){
   notifyParent(0);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   POLLING — alle 3 Nodes auf einmal, alle 2s
-   Kein SSE, keine Race-Conditions, keine Pfad-Probleme
-   ═══════════════════════════════════════════════════════════ */
+let pollRunning = false;
+
+function startPolling(){
+  stopPolling();
+  async function loop(){
+    if(!isOnline) return;
+    if(!pollRunning){
+      pollRunning = true;
+      try{ await pollAll(); }finally{ pollRunning = false; }
+    }
+    pollTimer = setTimeout(loop, 2000);
+  }
+  pollTimer = setTimeout(loop, 2000);
+}
+function stopPolling(){ if(pollTimer){ clearTimeout(pollTimer); pollTimer = null; } }
+
 async function pollAll(){
   if(!isOnline) return;
   try {
