@@ -54,15 +54,15 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:var(--sa
 .pl-badge{font-family:var(--mono);font-size:9px;font-weight:700;padding:2px 5px;border-radius:2px;flex-shrink:0;white-space:nowrap;}
 
 /* ══ CONTENT ══ */
-.content-area{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-.grid-view{flex:1;overflow-y:auto;padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;align-content:start;}
+.content-area{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;}
+.grid-view{flex:1;overflow-y:auto;padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;align-content:start;min-height:0;}
 .empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:40px;}
 .empty-icon{font-size:48px;opacity:.3;}
 .empty-title{font-family:var(--cond);font-size:22px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--dim);}
 .empty-sub{font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--dim);text-transform:uppercase;}
 
 /* ══ PATIENT CARD ══ */
-.pat-card{background:var(--sf);border:1px solid var(--bd);border-radius:3px;overflow:hidden;cursor:pointer;transition:all .15s;position:relative;}
+.pat-card{background:var(--sf);border:1px solid var(--bd);border-radius:3px;overflow:hidden;cursor:pointer;transition:all .15s;position:relative;min-height:0;}
 .pat-card:hover{border-color:var(--bd2);}
 .pat-card.done{border-style:dashed;opacity:.7;}
 .pat-card.synced{animation:syncflash .5s ease-out;}
