@@ -542,10 +542,8 @@ window.closeDlg  = () => {};
 window.connectFB = () => doConnect();
 
 async function doConnect(){
-  window.closeDlg();
   toast('Verbinde mit Firebase …', 'info');
   try {
-    // Verbindungstest
     await fbGet('/manv/patients');
   } catch(e) {
     toast('Verbindung fehlgeschlagen: ' + e.message, 'err');
@@ -557,11 +555,19 @@ async function doConnect(){
   // Presence registrieren
   try { await fbPut('/manv/presence/' + MY_ID, {at: Date.now()}); } catch(e){}
 
-  // Beim Schließen/Reload: Presence + eigener Lock löschen
-  window.addEventListener('beforeunload', () => {
-    fbDel('/manv/presence/' + MY_ID, true);
-    if(editId) fbDel('/manv/editing/' + editId, true);
-  }, {once: true});
+  // Zuverlässige Cleanup beim Schließen/Reload:
+  // 'pagehide' funktioniert auf mobil + desktop, 'beforeunload' als Fallback
+  function cleanup(){
+    // keepalive:true = Browser schickt Request auch nach Seitenende
+    fetch(FB + '/manv/presence/' + MY_ID + '.json?_=' + Date.now(),
+      {method:'DELETE', keepalive:true});
+    if(editId){
+      fetch(FB + '/manv/editing/' + editId + '.json?_=' + Date.now(),
+        {method:'DELETE', keepalive:true});
+    }
+  }
+  window.addEventListener('pagehide',    cleanup, {once:true});
+  window.addEventListener('beforeunload', cleanup, {once:true});
 
   // Sofort ersten Poll, dann Polling-Loop starten
   await pollAll();
@@ -574,11 +580,11 @@ function goOffline(silent=false){
   isOnline = false;
   stopPolling();
   if(editId) releaseEditLock(editId);
-  fbDel('/manv/presence/' + MY_ID, true).catch(()=>{});
-  // Patienten-Liste leeren — Online-Daten gehören nicht in den lokalen Modus
-  patients = [];
-  patN = 0;
-  editingLocks = {};
+  // Presence sofort löschen mit keepalive
+  fetch(FB + '/manv/presence/' + MY_ID + '.json?_=' + Date.now(),
+    {method:'DELETE', keepalive:true}).catch(()=>{});
+  // Lokalen State leeren
+  patients = []; patN = 0; editingLocks = {};
   updateLockBadges();
   render();
   if(!silent) toast('Lokaler Modus aktiv', 'info');
@@ -610,12 +616,28 @@ async function pollAll(){
       fbGet('/manv/editing')
     ]);
 
+    // ── Presence / Teilnehmer ──────────────────────────────
+    const presKeys  = presData ? Object.keys(presData) : [];
+    const userCount = presKeys.length;
+    notifyParent(userCount);
+
+    // ── 0 Teilnehmer = Alle Daten löschen ─────────────────
+    // Passiert wenn letzter User die Seite schließt/neu lädt und
+    // der beforeunload-Handler die Presence erfolgreich gelöscht hat.
+    // Wir prüfen das bei jedem Poll — sobald presence leer ist, räumen wir auf.
+    if(userCount === 0){
+      await Promise.all([
+        fbDel('/manv/patients'),
+        fbDel('/manv/editing')
+      ]).catch(()=>{});
+      patients = []; patN = 0; editingLocks = {};
+      render(); updateLockBadges();
+      return;
+    }
+
     // ── Patienten ──────────────────────────────────────────
-    // pData ist entweder null oder { id: {vollständiges Patient-Objekt}, ... }
-    // Jeder Wert MUSS ein Objekt mit .id und .num sein (Schutz gegen Firebase-Feld-Iteration)
     if(pData === null){
-      patients = [];
-      patN = 0;
+      patients = []; patN = 0;
     } else {
       const valid = Object.values(pData).filter(
         v => v && typeof v === 'object' && typeof v.id === 'string' && typeof v.num === 'number'
@@ -624,10 +646,6 @@ async function pollAll(){
       patN = patients.reduce((m,p) => Math.max(m, p.num), 0);
     }
     render();
-
-    // ── Presence / Teilnehmer ──────────────────────────────
-    const userCount = presData ? Object.keys(presData).length : 0;
-    notifyParent(userCount);
 
     // ── Editing Locks ──────────────────────────────────────
     editingLocks = lockData || {};
@@ -648,12 +666,20 @@ async function pollAll(){
    ═══════════════════════════════════════════════════════════ */
 async function acquireEditLock(pid){
   if(!isOnline || !pid) return;
-  try { await fbPut('/manv/editing/' + pid, MY_ID); } catch(e){}
+  try {
+    await fbPut('/manv/editing/' + pid, MY_ID);
+    // Sofort poll damit andere User den Lock sofort sehen (nicht erst nach 2s)
+    await pollAll();
+  } catch(e){}
 }
 async function releaseEditLock(pid){
   if(!isOnline || !pid) return;
   try {
-    if(editingLocks[pid] === MY_ID) await fbDel('/manv/editing/' + pid);
+    if(editingLocks[pid] === MY_ID) {
+      await fbDel('/manv/editing/' + pid);
+      // Sofort poll damit andere User den freigegeben Lock sofort sehen
+      await pollAll();
+    }
   } catch(e){}
 }
 function isLockedByOther(pid){
