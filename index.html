@@ -168,7 +168,7 @@ header {
 }
 .nav-icon { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; }
 .nav-icon svg { width: 19px; height: 19px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-.nav-label { font-family: var(--mono); font-size: 9px; letter-spacing: 1px; color: inherit; text-transform: uppercase; text-align: center; line-height: 1.2; }
+.nav-label { font-family: var(--mono); font-size: 9px; letter-spacing: .2px; color: inherit; text-transform: uppercase; text-align: center; line-height: 1.2; }
 
 /* ════════════════════════════════
    VIEWS
@@ -201,7 +201,7 @@ header {
 
 .modules-section { padding: 28px 40px; }
 .section-head { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
-.section-tag { font-family: var(--mono); font-size: 8px; letter-spacing: 3px; color: var(--dim); text-transform: uppercase; padding: 3px 8px; border: 1px solid var(--bd); background: var(--sf); }
+.section-tag { font-family: var(--mono); font-size: 9px; letter-spacing: 3px; color: var(--dim); text-transform: uppercase; padding: 3px 8px; border: 1px solid var(--bd); background: var(--sf); }
 .section-line { flex: 1; height: 1px; background: var(--bd); }
 .modules-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 12px; align-items: stretch; }
 
@@ -214,11 +214,11 @@ header {
 .mc-header { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 12px; }
 .mc-icon-wrap { width: 44px; height: 44px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: var(--sf3); border: 1px solid var(--bd); font-size: 20px; }
 .mc-meta { flex: 1; }
-.mc-tag { font-family: var(--mono); font-size: 7px; letter-spacing: 2px; color: var(--card-accent, var(--red)); text-transform: uppercase; margin-bottom: 4px; }
-.mc-title { font-family: var(--cond); font-size: 22px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--white); line-height: 1.1; }
+.mc-tag { font-family: var(--mono); font-size: 9px; letter-spacing: 2px; color: var(--card-accent, var(--red)); text-transform: uppercase; margin-bottom: 4px; }
+.mc-title { font-family: var(--cond); font-size: 25px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--white); line-height: 1.1; }
 .mc-desc { font-size: 14px; font-weight: 300; color: var(--txt2); line-height: 1.5; flex: 1; margin-bottom: 12px; }
 .mc-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 10px; border-top: 1px solid var(--bd); }
-.mc-status { display: flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 8px; letter-spacing: 1px; color: var(--grn); text-transform: uppercase; }
+.mc-status { display: flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 9px; letter-spacing: 1px; color: var(--grn); text-transform: uppercase; }
 .mc-status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--grn); box-shadow: 0 0 4px rgba(82,183,136,.5); }
 .mc-open-btn { font-family: var(--mono); font-size: 8px; letter-spacing: 2px; color: var(--card-accent, var(--red)); text-transform: uppercase; background: none; border: 1px solid var(--card-accent, var(--red)); padding: 4px 10px; cursor: pointer; transition: all .15s; }
 .mc-open-btn:hover { background: var(--card-accent, var(--red)); color: #fff; }
@@ -444,7 +444,7 @@ header {
       <div class="dashboard-hero">
         <div class="hero-eyebrow">Digitale Einsatzdokumentation</div>
         <div class="hero-title">Rettungs<em>Netz</em></div>
-        <div class="hero-sub">Zentrale Plattform für mobile Einsatzdokumentation und Fahrzeugplanung im Rettungsdienst.</div>
+        <div class="hero-sub">Zentrales Portal für mobile Einsatzdokumentation, MANV-Triage und Fahrzeugplanung im Roleplay Bereich.</div>
       </div>
       <div class="modules-section">
         <div class="section-head">
@@ -470,7 +470,7 @@ header {
             <div class="mc-header">
               <div class="mc-icon-wrap" style="font-size:22px">🚨</div>
               <div class="mc-meta">
-                <div class="mc-tag">Modul 03 · MANV · Triage</div>
+                <div class="mc-tag">Modul 02 · MANV · Triage</div>
                 <div class="mc-title">MANV Triage</div>
               </div>
             </div>
@@ -484,7 +484,7 @@ header {
             <div class="mc-header">
               <div class="mc-icon-wrap">🚑</div>
               <div class="mc-meta">
-                <div class="mc-tag">Modul 02 · Planung</div>
+                <div class="mc-tag">Modul 03 · Planung</div>
                 <div class="mc-title">Fahrzeug-Planer</div>
               </div>
             </div>
@@ -497,7 +497,7 @@ header {
         </div>
       </div>
       <div class="sysinfo-grid">
-        <div class="sysinfo-cell"><span class="sysinfo-label">Verfügbare Module</span><span class="sysinfo-val">3</span><span class="sysinfo-note">Protokoll · Fahrzeugplaner · MANV</span></div>
+        <div class="sysinfo-cell"><span class="sysinfo-label">Verfügbare Module</span><span class="sysinfo-val">3</span><span class="sysinfo-note">Schnell · Einfach · Kompakt</span></div>
         <div class="sysinfo-cell"><span class="sysinfo-label">Plattform</span><span class="sysinfo-val">Web</span><span class="sysinfo-note">Browser-basiert · Offline-fähig</span></div>
         <div class="sysinfo-cell"><span class="sysinfo-label">Version</span><span class="sysinfo-val">1.0</span><span class="sysinfo-note">Build 2025.03</span></div>
       </div>
