@@ -286,7 +286,6 @@ header {
   <div class="bl-dot"></div>
   <div class="bl-dot"></div>
   <div class="bl-dot"></div>
-  <div class="bl-dot"></div>
 </div>
 <div class="corner-deco tl"></div>
 <div class="corner-deco br"></div>
@@ -397,44 +396,87 @@ header {
     <div class="toolbar-panel" id="tb-fahrzeug">
       <div class="tb-sep"></div>
       <div class="h-mode-tabs">
-        <div class="h-mtab active" id="idx-tab-plan"   onclick="fzSetMode('plan')">🚑 Fahrzeuge</div>
-        <div class="h-mtab"       id="idx-tab-editor"  onclick="fzSetMode('editor')">📐 Stellplätze</div>
-        <div class="h-mtab"       id="idx-tab-wall"    onclick="fzSetMode('wall')">🧱 Flächen</div>
-        <div class="h-mtab"       id="idx-tab-text"    onclick="fzSetMode('text')">🔤 Text</div>
+        <div class="h-mtab active" id="idx-tab-plan"   onclick="fzSetMode('plan')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" width="12" height="12" style="flex-shrink:0"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          Fahrzeuge
+        </div>
+        <div class="h-mtab" id="idx-tab-editor" onclick="fzSetMode('editor')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" width="12" height="12" style="flex-shrink:0"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Stellplätze
+        </div>
+        <div class="h-mtab" id="idx-tab-wall" onclick="fzSetMode('wall')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" width="12" height="12" style="flex-shrink:0"><rect x="2" y="7" width="20" height="14" rx="1"/><path d="M2 11h20M8 7V3M16 7V3"/></svg>
+          Flächen
+        </div>
+        <div class="h-mtab" id="idx-tab-text" onclick="fzSetMode('text')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" width="12" height="12" style="flex-shrink:0"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+          Text
+        </div>
       </div>
       <div class="tb-sep"></div>
 
+      <!-- Plan mode buttons -->
       <div id="idx-hbtn-plan" style="display:flex;gap:5px;align-items:center;">
-        <button class="hbtn grn" onclick="fzCall('openCreateModal')">+ Fahrzeug</button>
-        <button class="hbtn danger sm" onclick="fzCall('clearVehicles')">Leeren</button>
+        <button class="hbtn grn" onclick="fzCall('openCreateModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Fahrzeug
+        </button>
+        <button class="hbtn danger sm" onclick="fzCall('clearVehicles')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          Leeren
+        </button>
       </div>
+      <!-- Editor mode buttons -->
       <div id="idx-hbtn-editor" style="display:none;gap:5px;align-items:center;">
-        <button class="hbtn blu" onclick="fzCall('addSpotBtn')">+ Stellplatz</button>
-        <button class="hbtn blu" onclick="fzCall('copySelSpot')">⧉ Kopieren</button>
-        <button class="hbtn danger sm" onclick="fzCall('deleteAllSpots')">✕ Alle löschen</button>
+        <button class="hbtn blu" onclick="fzCall('addSpotBtn')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Stellplatz
+        </button>
+        <button class="hbtn blu" onclick="fzCall('copySelSpot')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Kopieren
+        </button>
+        <button class="hbtn danger sm" onclick="fzCall('deleteAllSpots')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          Alle löschen
+        </button>
       </div>
+      <!-- Wall mode buttons -->
       <div id="idx-hbtn-wall" style="display:none;gap:5px;align-items:center;">
-        <button class="hbtn pur" onclick="fzCall('addWall')">+ Fläche</button>
-        <button class="hbtn pur" onclick="fzCall('addGate')">+ Tor</button>
-        <button class="hbtn danger sm" onclick="fzCall('deleteAllWalls')">✕ Alle löschen</button>
+        <button class="hbtn pur" onclick="fzCall('addWall')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Fläche
+        </button>
+        <button class="hbtn pur" onclick="fzCall('addGate')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Tor
+        </button>
+        <button class="hbtn danger sm" onclick="fzCall('deleteAllWalls')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          Alle löschen
+        </button>
       </div>
+      <!-- Text mode buttons -->
       <div id="idx-hbtn-text" style="display:none;gap:5px;align-items:center;">
-        <button class="hbtn pur" onclick="fzCall('addTextLabel')">+ Text</button>
-        <button class="hbtn danger sm" onclick="fzCall('deleteAllTexts')">✕ Alle löschen</button>
+        <button class="hbtn pur" onclick="fzCall('addTextLabel')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Text
+        </button>
+        <button class="hbtn danger sm" onclick="fzCall('deleteAllTexts')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          Alle löschen
+        </button>
       </div>
 
       <div class="tb-sep"></div>
-      <button class="hbtn" id="idx-btnUndo" onclick="fzCall('undo')" disabled>↩ Undo</button>
-      <button class="hbtn" id="idx-btnRedo" onclick="fzCall('redo')" disabled>↪ Redo</button>
-      <div class="tb-sep"></div>
-      <button class="hbtn" onclick="fzCall('exportPNG')">📷 PNG</button>
-      <div style="width:6px;flex-shrink:0;"></div>
-      <button class="hbtn amb" onclick="fzCall('exportPlan')">💾 Export</button>
-      <div style="width:6px;flex-shrink:0;"></div>
-      <button class="hbtn cya" onclick="fzImportClick()">📂 Import</button>
-      <input type="file" id="idx-importFile" accept=".json" style="display:none" onchange="fzImport(this)">
-      <div style="width:6px;flex-shrink:0;"></div>
-      <button class="hbtn pri" onclick="fzPrint()">🖨 Drucken</button>
+      <button class="hbtn" id="idx-btnUndo" onclick="fzCall('undo')" disabled style="opacity:.35">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/></svg>
+        Undo
+      </button>
+      <button class="hbtn" id="idx-btnRedo" onclick="fzCall('redo')" disabled style="opacity:.35">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.49-4.95"/></svg>
+        Redo
+      </button>
     </div>
 
     <!-- ── ATEMSCHUTZ toolbar ── -->

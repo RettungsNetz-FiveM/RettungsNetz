@@ -6,12 +6,19 @@
 <title>Einsatz Planer</title>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;500;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap');
 :root{
-  --bg:#0b0d11;--sf:#13161d;--sf2:#1a1e28;--bd:#252a38;
-  --red:#e63946;--red2:#c1121f;--amb:#f4a261;--grn:#52b788;--blu:#4895ef;
-  --pur:#8b5cf6;--txt:#dde2f0;--dim:#5a6080;
-  --mono:'Share Tech Mono',monospace;--sans:'Barlow',sans-serif;
+  --bg:#080b10;--sf:#0d1117;--sf2:#111822;--sf3:#161e2e;
+  --bd:#1e2a3a;--bd2:#253040;
+  --red:#e63946;--red2:#c1121f;--red-glow:rgba(230,57,70,.18);
+  --amb:#f4a261;--grn:#52b788;--blu:#4895ef;--pur:#8b5cf6;
+  --txt:#cdd6e8;--txt2:#8a9ab5;--dim:#4a5a70;--white:#f0f4fa;
+  --mono:'Share Tech Mono',monospace;--cond:'Barlow Condensed',sans-serif;--sans:'Barlow',sans-serif;
+}
+body::before{
+  content:'';position:fixed;inset:0;z-index:9999;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px);
+  pointer-events:none;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--txt);font-family:var(--sans)}
@@ -66,51 +73,90 @@ header{
 .h-live-text{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;color:#52b788;text-transform:uppercase;}
 
 /* Module tag */
-.h-module-tag{display:flex;align-items:center;gap:6px;padding:0 20px;height:100%;}
-.h-module-pip{
-  font-family:var(--mono);font-size:7px;letter-spacing:2px;color:#4a5a70;
-  text-transform:uppercase;padding:3px 8px;border:1px solid var(--bd);background:#111822;
-}
+.h-module-tag{display:flex;align-items:center;padding:0 20px;border-right:1px solid var(--bd);height:100%;}
+.h-module-inner{display:flex;flex-direction:column;gap:2px;}
+.h-module-label{font-family:var(--mono);font-size:7px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;}
+.h-module-name{font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--txt);text-transform:uppercase;}
 
 /* Mode tabs */
 .mode-tabs{display:flex;gap:4px;padding:0 14px;border-left:1px solid var(--bd);height:100%;align-items:center;}
 .mtab{
-  font-family:var(--mono);font-size:10px;letter-spacing:1px;padding:5px 14px;
+  font-family:var(--mono);font-size:10px;letter-spacing:1px;padding:0 14px;
+  height:30px;
   border:1px solid var(--bd);background:var(--sf2);color:var(--dim);
   cursor:pointer;border-radius:3px;text-transform:uppercase;transition:all .15s;
+  display:flex;align-items:center;
 }
 .mtab.active{background:var(--red);border-color:var(--red);color:#fff}
 .mtab:not(.active):hover{border-color:var(--dim);color:var(--txt)}
 .hbtns{margin-left:auto;display:flex;gap:5px;flex-wrap:nowrap;padding-right:14px;align-items:center;}
 .btn{
-  font-family:var(--mono);font-size:10px;letter-spacing:1px;padding:5px 11px;
+  font-family:var(--mono);font-size:10px;letter-spacing:1px;padding:0 11px;
+  height:30px;
   border:1px solid var(--bd);background:var(--sf2);color:var(--txt);
   cursor:pointer;border-radius:3px;text-transform:uppercase;transition:all .15s;white-space:nowrap;
+  display:flex;align-items:center;gap:5px;flex-shrink:0;
 }
 .btn:hover{border-color:var(--red);color:var(--red)}
 .btn.pri{background:var(--red);border-color:var(--red);color:#fff}
-.btn.pri:hover{background:var(--red2)}
+.btn.pri:hover{background:var(--red2);border-color:var(--red2);color:#fff}
 .btn.grn{background:#1a3a2a;border-color:var(--grn);color:var(--grn)}
 .btn.grn:hover{background:#224433}
 .btn.blu{background:#0d2035;border-color:var(--blu);color:var(--blu)}
 .btn.blu:hover{background:#112844}
 .btn.pur{background:#1e1535;border-color:var(--pur);color:var(--pur)}
 .btn.pur:hover{background:#281c44}
-.btn.sm{padding:3px 8px;font-size:9px}
+.btn.amb{background:#2d1f00;border-color:#ffab00;color:#ffab00}
+.btn.amb:hover{background:#3a2900}
+.btn.sm{padding:0 8px;font-size:9px;height:26px;}
 
 /* ── LAYOUT ── */
-.app{display:flex;height:calc(100vh - 30px);overflow:hidden}
+.app{display:flex;height:calc(100vh - 34px);overflow:hidden;margin-top:0}
 
 /* ── LEFT PANEL ── */
 .lpanel{
   width:215px;background:var(--sf);border-right:1px solid var(--bd);
   display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;
+  transition:width .2s ease, border-color .2s ease;
+  position:relative;
 }
-.lp-body{flex:1;overflow-y:auto;padding:0}
+.lpanel.collapsed{width:0;border-right:none;}
+
+/* Toggle button */
+.lp-toggle{
+  position:absolute;top:50%;right:-12px;transform:translateY(-50%);
+  width:12px;height:40px;background:var(--sf);border:1px solid var(--bd);
+  border-left:none;border-radius:0 3px 3px 0;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;z-index:50;transition:background .15s;color:var(--dim);
+  font-size:8px;
+}
+.lp-toggle:hover{background:var(--sf2);color:var(--txt);}
+.lpanel.collapsed .lp-toggle{right:-12px;border-left:1px solid var(--bd);border-radius:0 3px 3px 0;}
+
+.lp-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 10px;height:36px;flex-shrink:0;
+  border-bottom:1px solid var(--bd);background:var(--sf2);
+}
+.lp-header-title{
+  font-family:var(--mono);font-size:8px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;
+}
+.lp-collapse-btn{
+  font-family:var(--mono);font-size:9px;letter-spacing:1px;
+  padding:0 8px;height:22px;
+  border:1px solid var(--bd);background:var(--sf);color:var(--dim);
+  cursor:pointer;border-radius:3px;text-transform:uppercase;transition:all .15s;
+  display:flex;align-items:center;gap:4px;white-space:nowrap;
+}
+.lp-collapse-btn:hover{border-color:var(--red);color:var(--red);}
+
+.lp-body{flex:1;overflow-y:auto;padding:0;overflow-x:hidden;}
 .sb-sec{padding:10px;border-bottom:1px solid var(--bd)}
 .sb-title{
   font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--red);
   text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;
+  user-select:none;
 }
 .vlist{display:flex;flex-direction:column;gap:3px}
 .vitem{
@@ -139,13 +185,14 @@ header{
 .canvas-wrap{
   flex:1;overflow:auto;position:relative;
   background:
-    repeating-linear-gradient(0deg,transparent,transparent 19px,rgba(255,255,255,.02) 19px,rgba(255,255,255,.02) 20px),
-    repeating-linear-gradient(90deg,transparent,transparent 19px,rgba(255,255,255,.02) 19px,rgba(255,255,255,.02) 20px),
+    radial-gradient(ellipse 80% 50% at 50% 30%, rgba(230,57,70,.04) 0%, transparent 60%),
+    repeating-linear-gradient(0deg,transparent,transparent 19px,rgba(255,255,255,.018) 19px,rgba(255,255,255,.018) 20px),
+    repeating-linear-gradient(90deg,transparent,transparent 19px,rgba(255,255,255,.018) 19px,rgba(255,255,255,.018) 20px),
     var(--bg);
 }
 #planRoot{
   position:relative;width:1400px;height:900px;margin:20px auto;
-  background:#0e1118;border:1px solid var(--bd);border-radius:4px;flex-shrink:0;
+  background:#0a0d14;border:1px solid var(--bd);border-radius:4px;flex-shrink:0;
 }
 
 /* SNAP GUIDES */
@@ -248,6 +295,7 @@ header{
 .rp-hd{
   padding:10px 12px;border-bottom:1px solid var(--bd);flex-shrink:0;
   font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--red);text-transform:uppercase;
+  background:var(--sf2);
 }
 .rp-body{padding:12px}
 .prow{margin-bottom:10px}
@@ -280,12 +328,50 @@ header{
 .fbtn:hover:not(.act){border-color:var(--dim);color:var(--txt)}
 .divider{height:1px;background:var(--bd);margin:10px 0}
 
+/* ── STATUS BAR ── */
+.statusbar{
+  position:fixed;bottom:0;left:0;right:0;height:34px;
+  background:var(--sf);border-top:1px solid var(--bd);
+  display:flex;flex-direction:row;align-items:center;z-index:200;
+}
+.si{
+  font-family:var(--mono);font-size:9px;color:var(--dim);
+  display:flex;flex-direction:row;align-items:center;gap:5px;white-space:nowrap;flex-shrink:0;
+  padding:0 12px;height:100%;border-right:1px solid var(--bd);
+}
+.si>span{color:var(--txt);display:inline-flex;align-items:center;border:none;outline:none}
+.mode-badge{
+  font-family:var(--mono);font-size:8px;letter-spacing:1px;text-transform:uppercase;
+  padding:2px 7px;border-radius:2px;white-space:nowrap;border:none;outline:none;
+  display:inline-flex;align-items:center;justify-content:center;
+}
+#sMode{display:inline-flex;align-items:center;border:none!important;outline:none!important;background:none!important}
+.mode-badge.plan{background:#1a3a2a;color:var(--grn)}
+.mode-badge.editor{background:#0d2035;color:var(--blu)}
+.mode-badge.mbwall{background:#1e1535;color:var(--pur)}
+
+/* ── STATUS BAR BUTTONS ── */
+.sb-btn{
+  font-family:var(--mono);font-size:10px;letter-spacing:1px;
+  padding:0 10px;height:24px;
+  border:1px solid var(--bd);background:var(--sf2);color:var(--txt);
+  cursor:pointer;border-radius:3px;text-transform:uppercase;transition:all .15s;white-space:nowrap;
+  display:flex;align-items:center;gap:5px;flex-shrink:0;
+}
+.sb-btn:hover{border-color:var(--red);color:var(--red);}
+.sb-btn.amb{background:#2d1f00;border-color:#ffab00;color:#ffab00;}
+.sb-btn.amb:hover{background:#3a2900;}
+.sb-btn.cya{background:#1a2a4a;border-color:#4fc3f7;color:#4fc3f7;}
+.sb-btn.cya:hover{background:#112844;}
+.sb-btn.pri{background:var(--red);border-color:var(--red);color:#fff;}
+.sb-btn.pri:hover{background:var(--red2);}
+
 /* ── KEYBIND PANEL ── */
 #keybindBtn{
   background:var(--sf2);border:1px solid var(--pur);color:var(--pur);
   font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:1.5px;
-  padding:4px 12px;border-radius:3px;cursor:pointer;
-  transition:all .15s;text-transform:uppercase;
+  padding:0 12px;height:22px;border-radius:3px;cursor:pointer;
+  transition:all .15s;text-transform:uppercase;display:flex;align-items:center;
 }
 #keybindBtn:hover,#keybindBtn.open{background:#2a1a50;border-color:#c4b5fd;color:#c4b5fd;box-shadow:0 0 8px rgba(139,92,246,.4)}
 .kb-section{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--pur);text-transform:uppercase;margin:12px 0 6px;opacity:.9;font-weight:700}
@@ -295,26 +381,17 @@ header{
 .kb-key{font-family:var(--mono);font-size:10px;color:var(--txt);background:var(--sf2);border:1px solid var(--bd);border-bottom:2px solid var(--bd);border-radius:4px;padding:2px 8px;white-space:nowrap;flex-shrink:0;letter-spacing:.5px}
 .kb-desc{font-family:var(--mono);font-size:10px;color:var(--dim);text-align:right}
 
-/* ── STATUS BAR ── */
-.statusbar{
-  position:fixed;bottom:0;left:0;right:0;height:30px;
-  background:var(--sf);border-top:1px solid var(--bd);
-  display:flex;flex-direction:row;gap:16px;align-items:center;padding:0 14px;z-index:200;
+/* ── SIDEBAR EXPAND BTN (outside app for positioning) ── */
+#lpExpandBtn{
+  position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:100;
+  width:18px;height:56px;background:var(--sf);border:1px solid var(--bd);border-left:none;
+  border-radius:0 4px 4px 0;cursor:pointer;color:var(--dim);font-size:9px;
+  font-family:var(--mono);writing-mode:vertical-rl;letter-spacing:1px;
+  align-items:center;justify-content:center;transition:all .15s;padding:0;
+  display:none;
 }
-.si{
-  font-family:var(--mono);font-size:9px;color:var(--dim);
-  display:flex;flex-direction:row;align-items:center;gap:5px;white-space:nowrap;flex-shrink:0;
-}
-.si>span{color:var(--txt);display:inline-flex;align-items:center;border:none;outline:none}
-.mode-badge{
-  font-family:var(--mono);font-size:8px;letter-spacing:1px;text-transform:uppercase;
-  padding:3px 8px;border-radius:2px;white-space:nowrap;border:none;outline:none;
-  display:inline-flex;align-items:center;justify-content:center;
-}
-#sMode{display:inline-flex;align-items:center;border:none!important;outline:none!important;background:none!important}
-.mode-badge.plan{background:#1a3a2a;color:var(--grn)}
-.mode-badge.editor{background:#0d2035;color:var(--blu)}
-.mode-badge.mbwall{background:#1e1535;color:var(--pur)}
+#lpExpandBtn:hover{background:var(--sf2);color:var(--red);border-color:var(--red);}
+.app.sidebar-collapsed #lpExpandBtn{display:flex;}
 
 /* ── MULTI-SELECT ── */
 .cv.multi-sel{outline:2px solid #ffd60a;outline-offset:2px;box-shadow:0 0 12px rgba(255,214,10,.5)!important}
@@ -326,7 +403,7 @@ header{
 }
 /* ── MULTI-SELECT TOOLBAR ── */
 #multiToolbar{
-  display:none;position:fixed;bottom:36px;left:50%;transform:translateX(-50%);
+  display:none;position:fixed;bottom:40px;left:50%;transform:translateX(-50%);
   background:var(--sf2);border:1px solid #ffd60a;border-radius:6px;
   padding:5px 10px;gap:8px;align-items:center;z-index:500;
   font-family:var(--mono);font-size:9px;color:#ffd60a;
@@ -356,11 +433,12 @@ header{
 @keyframes sirenDot{0%,49%{background:#e63946}50%,100%{background:#4895ef}}
 .vi-siren{display:inline-block;width:7px;height:7px;border-radius:50%;margin-left:4px;animation:sirenDot .7s step-start infinite;flex-shrink:0;vertical-align:middle}
 
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:600;display:none;align-items:center;justify-content:center}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:600;display:none;align-items:center;justify-content:center}
 .overlay.open{display:flex}
 .modal{
   background:var(--sf);border:1px solid var(--bd);border-top:3px solid var(--red);
   width:400px;border-radius:4px;padding:20px;max-height:90vh;overflow-y:auto;
+  box-shadow:0 16px 48px rgba(0,0,0,.7);
 }
 .modal h3{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--red);margin-bottom:16px}
 .mrow{margin-bottom:12px}
@@ -426,9 +504,15 @@ body.text-mode #planRoot .tl-obj{pointer-events:auto}
 
 <div class="app">
   <!-- LEFT PANEL -->
-  <div class="lpanel">
+  <div class="lpanel" id="lpanel">
+    <div class="lp-header">
+      <span class="lp-header-title">Fahrzeugliste</span>
+      <button class="lp-collapse-btn" id="lpCollapseBtn" onclick="toggleSidebar()" title="Liste einklappen">◀ Einklappen</button>
+    </div>
     <div class="lp-body" id="sidebar"></div>
   </div>
+  <!-- SIDEBAR EXPAND BUTTON (shown when collapsed) -->
+  <button id="lpExpandBtn" onclick="toggleSidebar()" title="Fahrzeugliste ausklappen">▶ Liste</button>
 
   <!-- CANVAS -->
   <div class="canvas-wrap" id="canvasWrap">
@@ -453,14 +537,44 @@ body.text-mode #planRoot .tl-obj{pointer-events:auto}
   <div class="si">Modus: <span id="sMode" style="border:none;outline:none;background:none;box-shadow:none"><span class="mode-badge plan">Fahrzeuge</span></span></div>
   <div class="si">Fahrzeuge: <span id="sCnt">0</span></div>
   <div class="si">Stellplätze: <span id="sSpots">0</span></div>
-  <div class="si" style="margin-left:auto">
-    <button id="keybindBtn" onclick="toggleKeybinds()" title="Tastenkürzel anzeigen">⌨ Hilfe</button>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:0;height:100%;">
+    <div class="si">
+      <button class="sb-btn" onclick="exportPNG()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        PNG
+      </button>
+    </div>
+    <div class="si">
+      <button class="sb-btn amb" onclick="exportPlan()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export
+      </button>
+    </div>
+    <div class="si">
+      <button class="sb-btn cya" onclick="document.getElementById('sbImportFile').click()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Import
+      </button>
+      <input type="file" id="sbImportFile" accept=".json" style="display:none" onchange="importPlan(this)">
+    </div>
+    <div class="si">
+      <button class="sb-btn pri" onclick="window.print()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Drucken
+      </button>
+    </div>
+    <div class="si" style="border-right:none;">
+      <button id="keybindBtn" onclick="toggleKeybinds()" title="Tastenkürzel anzeigen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8"/></svg>
+        Hilfe
+      </button>
+    </div>
   </div>
 <div id="msMarquee"></div>
 </div>
 
 <!-- KEYBIND PANEL -->
-<div id="keybindPanel" style="display:none;position:fixed;bottom:36px;right:10px;z-index:500;background:var(--sf);border:1px solid var(--bd);border-top:3px solid var(--pur);border-radius:6px;padding:16px 20px;width:420px;max-height:70vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.6)">
+<div id="keybindPanel" style="display:none;position:fixed;bottom:40px;right:10px;z-index:500;background:var(--sf);border:1px solid var(--bd);border-top:3px solid var(--pur);border-radius:6px;padding:16px 20px;width:420px;max-height:70vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.6)">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
     <span style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;color:var(--txt)" id="kbTitle">Tastenkürzel</span>
     <span onclick="toggleKeybinds()" style="cursor:pointer;color:var(--dim);font-size:16px;line-height:1;padding:2px 6px;border-radius:3px;border:1px solid var(--bd)" title="Schließen">✕</span>
@@ -2471,6 +2585,31 @@ function importPlan(input){
   reader.readAsText(file);
 }
 
+
+// ════════════════════════════════════════════════════
+// SIDEBAR COLLAPSE / EXPAND
+// ════════════════════════════════════════════════════
+let sidebarCollapsed = false;
+function toggleSidebar(){
+  sidebarCollapsed = !sidebarCollapsed;
+  const lp = document.getElementById('lpanel');
+  const expandBtn = document.getElementById('lpExpandBtn');
+  const collapseBtn = document.getElementById('lpCollapseBtn');
+  const app = document.querySelector('.app');
+  if(sidebarCollapsed){
+    lp.style.width = '0';
+    lp.style.borderRight = 'none';
+    lp.style.overflow = 'hidden';
+    expandBtn.style.display = 'flex';
+    if(collapseBtn) collapseBtn.style.display = 'none';
+  } else {
+    lp.style.width = '215px';
+    lp.style.borderRight = '1px solid var(--bd)';
+    lp.style.overflow = 'hidden';
+    expandBtn.style.display = 'none';
+    if(collapseBtn) collapseBtn.style.display = 'flex';
+  }
+}
 
 window.addEventListener('load',()=>{
   buildSidebar();
