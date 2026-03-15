@@ -214,7 +214,7 @@ header {
 .section-head { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
 .section-tag { font-family: var(--mono); font-size: 9px; letter-spacing: 3px; color: var(--dim); text-transform: uppercase; padding: 3px 8px; border: 1px solid var(--bd); background: var(--sf); }
 .section-line { flex: 1; height: 1px; background: var(--bd); }
-.modules-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; align-items: stretch; padding-right: 390px}
+.modules-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; align-items: stretch;}
 
 .module-card { background: var(--sf); border: 1px solid var(--bd); border-top: 3px solid var(--bd2); padding: 20px 22px; cursor: pointer; transition: all .2s; position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 0; }
 .module-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--card-accent, var(--red)); transform: scaleX(0); transform-origin: left; transition: transform .25s; }
@@ -514,6 +514,41 @@ header {
     <!-- ── SCHEMA toolbar ── -->
     <div class="toolbar-panel" id="tb-schema"></div>
 
+    <!-- ── MEDIKAMENTEN-KATALOG toolbar ── -->
+    <div class="toolbar-panel" id="tb-katalog">
+      <div class="tb-sep"></div>
+      <button class="hbtn" onclick="katalogToggleTheme()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13" id="katalog-theme-icon"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        <span id="katalog-theme-label">Hell</span>
+      </button>
+      <div class="tb-sep"></div>
+      <button class="hbtn amb" onclick="katalogSend('doPrint')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Als PDF drucken
+      </button>
+      <div class="tb-sep"></div>
+      <button class="hbtn pur" onclick="katalogSend('exportPNG')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        PNG Export
+      </button>
+      <div class="tb-sep"></div>
+      <button class="hbtn blu" onclick="katalogImportClick()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Importieren
+      </button>
+      <input type="file" id="katalog-import-file-idx" accept=".json" style="display:none" onchange="katalogImportFile(this)">
+      <div class="tb-sep"></div>
+      <button class="hbtn grn" onclick="katalogSend('doExport')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Exportieren
+      </button>
+      <div class="tb-sep"></div>
+      <button class="hbtn" onclick="katalogSend('toggleWizard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+        Konfiguration
+      </button>
+    </div>
+
     <!-- ── PERSONALPLAN toolbar ── -->
     <div class="toolbar-panel" id="tb-personalplan">
 
@@ -601,6 +636,13 @@ header {
         <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="13" y2="18"/></svg>
       </span>
       <span class="nav-label">Schicht&shy;plan</span>
+    </button>
+
+    <button class="nav-btn" id="nav-katalog" onclick="openTool('katalog')" title="Medikamenten-Katalog">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+      </span>
+      <span class="nav-label">Med.&shy;Katalog</span>
     </button>
 
     <div class="sidebar-divider"></div>
@@ -713,10 +755,24 @@ header {
               <button class="mc-open-btn">Öffnen →</button>
             </div>
           </div>
+          <div class="module-card" data-accent="grn" onclick="openTool('katalog')" style="--card-accent:#52b788;">
+            <div class="mc-header">
+              <div class="mc-icon-wrap">💊</div>
+              <div class="mc-meta">
+                <div class="mc-tag">Modul 07 · Medizin</div>
+                <div class="mc-title">Medikamenten-Katalog</div>
+              </div>
+            </div>
+            <div class="mc-desc">Individuell konfigurierbarer Medikamentenkatalog. Spalten frei wählbar, Abschnitte mit Trennern, Farben pro Zeile/Spalte, Export als PDF oder PNG.</div>
+            <div class="mc-footer">
+              <span class="mc-status">Bereit</span>
+              <button class="mc-open-btn">Öffnen →</button>
+            </div>
+          </div>
         </div>
       </div>
       <div class="sysinfo-grid">
-        <div class="sysinfo-cell"><span class="sysinfo-label">Verfügbare Module</span><span class="sysinfo-val">6</span><span class="sysinfo-note">Praxisnah · Direkt · Leicht</span></div>
+        <div class="sysinfo-cell"><span class="sysinfo-label">Verfügbare Module</span><span class="sysinfo-val">7</span><span class="sysinfo-note">Praxisnah · Direkt · Leicht</span></div>
         <div class="sysinfo-cell"><span class="sysinfo-label">Version</span><span class="sysinfo-val">1.0</span><span class="sysinfo-note">Build 2026.03</span></div>
         <div class="sysinfo-cell"><span class="sysinfo-label">Letztes Update</span><span class="sysinfo-val" id="last-update-date">12.03.2026</span><span class="sysinfo-note" id="last-update-note">Patch · UI · Bugfixes</span></div>
       </div>
@@ -749,7 +805,12 @@ header {
 
     <!-- ── SCHICHT- & PERSONALPLAN ── -->
     <div class="tool-view" id="view-personalplan">
-      <iframe class="tool-frame" id="frame-personalplan" src="" title="Schicht- & Personalplan"></iframe>
+      <iframe class="tool-frame" id="frame-personalplan" src="" title="Schicht- &amp; Personalplan"></iframe>
+    </div>
+
+    <!-- ── MEDIKAMENTEN-KATALOG ── -->
+    <div class="tool-view" id="view-katalog">
+      <iframe class="tool-frame" id="frame-katalog" src="" title="Medikamenten-Katalog"></iframe>
     </div>
 
     <!-- ── INFO ── -->
@@ -916,6 +977,7 @@ const MODULE_META = {
   atemschutz:   { label: 'Modul 04 · Atemschutz',      name: 'Atemschutzüberwachung'   },
   schema:       { label: 'Modul 05 · Nachschlagewerk', name: 'Schema-Nachschlagewerk'  },
   personalplan: { label: 'Modul 06 · Personal',        name: 'Schicht- & Personalplan' },
+  katalog:      { label: 'Modul 07 · Medizin',         name: 'Medikamenten-Katalog'    },
   info:         { label: 'Aktives Modul',              name: 'Info · Hilfe'            },
 };
 
@@ -946,7 +1008,7 @@ const frameLoaded = {};
 function openTool(tool) {
   showView(tool);
   if (!frameLoaded[tool]) {
-    const src = { protokol: 'Einsatz-Protokol.html', fahrzeug: 'Fahrzeugplaner.html', manv: 'MANV-Triage.html', atemschutz: 'Atemschutzueberwachung.html', schema: 'Schema-Nachschlage.html', personalplan: 'Schicht-Personalplan.html' };
+    const src = { protokol: 'Einsatz-Protokol.html', fahrzeug: 'Fahrzeugplaner.html', manv: 'MANV-Triage.html', atemschutz: 'Atemschutzueberwachung.html', schema: 'Schema-Nachschlage.html', personalplan: 'Schicht-Personalplan.html', katalog: 'Medikamenten-Katalog.html' };
     const f = document.getElementById('frame-' + tool);
     if (f && src[tool]) { f.src = src[tool]; frameLoaded[tool] = true; }
   }
@@ -1188,6 +1250,30 @@ function manvUpdateModeUI(online, users) {
     bl.classList.remove('active');
   };
 })();
+
+// ── Medikamenten-Katalog ──
+let _katalogDark = true;
+function katalogSend(fn, arg) { sendToFrame('frame-katalog', 'katalog', fn, arg); }
+function katalogToggleTheme() {
+  _katalogDark = !_katalogDark;
+  document.getElementById('katalog-theme-label').textContent = _katalogDark ? 'Hell' : 'Dunkel';
+  var ic = document.getElementById('katalog-theme-icon');
+  if (ic) ic.innerHTML = _katalogDark
+    ? '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>'
+    : '<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>';
+  katalogSend('toggleTheme');
+}
+function katalogImportClick() { document.getElementById('katalog-import-file-idx').click(); }
+function katalogImportFile(input) {
+  const file = input.files[0]; if (!file) return;
+  const f = document.getElementById('frame-katalog');
+  if (f && f.contentWindow) {
+    const reader = new FileReader();
+    reader.onload = e => { f.contentWindow.postMessage({ target: 'katalog', fn: 'importFromParent', arg: e.target.result }, '*'); };
+    reader.readAsText(file);
+  }
+  input.value = '';
+}
 
 // ── Personalplan ──
 let _ppDark = true;
