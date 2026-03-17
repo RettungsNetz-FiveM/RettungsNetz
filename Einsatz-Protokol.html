@@ -452,7 +452,108 @@ body {
 /* JS sets body.printing before window.print() to hide placeholders */
 body.printing input::placeholder,
 body.printing textarea::placeholder { color: transparent !important; }
-</style>
+
+/* ══ BODYMAP ══ */
+.bm-zone { cursor: pointer; }
+.bm-zone-lbl {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px; font-weight: 700;
+  pointer-events: none;
+}
+
+/* Zone popup */
+.bm-popup-overlay {
+  position: fixed; inset: 0; z-index: 8000;
+  background: rgba(0,0,0,.5);
+  display: flex; align-items: center; justify-content: center;
+  animation: warnFadeIn .15s ease;
+}
+.bm-popup {
+  background: var(--card);
+  border: 2px solid var(--rot);
+  border-radius: 6px;
+  padding: 26px 28px 22px;
+  min-width: 420px; max-width: 520px; width: 95%;
+  box-shadow: 0 0 40px rgba(192,57,43,.35), 0 12px 36px rgba(0,0,0,.65);
+  animation: warnPop .2s cubic-bezier(.34,1.56,.64,1);
+  display: flex; flex-direction: column; gap: 14px;
+}
+[data-theme="light"] .bm-popup { background: #fff; }
+.bm-popup-title {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 16px; font-weight: 800; letter-spacing: .05em;
+  text-transform: uppercase; color: var(--rot);
+  border-bottom: 1px solid var(--g6); padding-bottom: 12px;
+}
+.bm-popup-sub {
+  font-size: 9px; font-weight: 700; letter-spacing: .09em;
+  text-transform: uppercase; color: var(--g4); margin-bottom: 2px;
+}
+.bm-popup-checks {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px;
+}
+.bm-popup-ci {
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer; font-size: 14px; font-weight: 500;
+  color: var(--g1); user-select: none; padding: 8px 10px;
+  border-radius: 4px; border: 1px solid transparent;
+  transition: background .1s, border-color .1s;
+}
+.bm-popup-ci:hover { background: var(--g7); border-color: var(--g6); }
+.bm-popup-ci input[type="checkbox"] {
+  width: 18px; height: 18px; accent-color: var(--rot);
+  cursor: pointer; margin: 0; flex-shrink: 0;
+}
+.bm-popup-ci.checked {
+  color: var(--rot); font-weight: 700;
+  background: rgba(192,57,43,.07); border-color: rgba(192,57,43,.3);
+}
+.bm-popup-btns {
+  display: flex; gap: 10px; justify-content: flex-end; padding-top: 8px;
+  border-top: 1px solid var(--g6); margin-top: 4px;
+}
+.bm-btn-ok {
+  background: var(--rot); color: #fff; border: none; cursor: pointer;
+  font-family: 'IBM Plex Sans', sans-serif; font-size: 12px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase;
+  padding: 10px 28px; border-radius: 3px; transition: background .15s;
+}
+.bm-btn-ok:hover { background: var(--rot-d); }
+.bm-btn-cancel {
+  background: transparent; color: var(--g4); border: 1px solid var(--g5);
+  cursor: pointer; font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+  padding: 8px 18px; border-radius: 3px; transition: border-color .15s, color .15s;
+}
+.bm-btn-cancel:hover { border-color: var(--g4); color: var(--g2); }
+
+/* Legend */
+.bodymap-empty { font-size: 9px; color: var(--g5); font-style: italic; padding: 4px 0; }
+.bm-legend-entry {
+  display: flex; align-items: flex-start; gap: 7px;
+  background: var(--g7); border-left: 3px solid var(--rot);
+  padding: 5px 8px; border-radius: 2px;
+}
+.bm-legend-zone {
+  font-size: 9px; font-weight: 800; color: var(--rot);
+  font-family: 'IBM Plex Mono', monospace; white-space: nowrap; min-width: 70px; margin-top: 1px;
+}
+.bm-legend-types { font-size: 10px; color: var(--g2); line-height: 1.5; flex: 1; }
+.bm-legend-del {
+  background: transparent; border: none; color: var(--g5); cursor: pointer;
+  font-size: 12px; padding: 0 2px; line-height: 1; flex-shrink: 0; transition: color .12s;
+}
+.bm-legend-del:hover { color: var(--rot); }
+
+.btn-bm {
+  background: transparent; border: 1px solid var(--g5); color: var(--g4);
+  font-family: 'IBM Plex Mono', monospace; font-size: 8px; letter-spacing: 0.06em;
+  text-transform: uppercase; padding: 3px 10px; cursor: pointer; border-radius: 2px;
+  transition: border-color .15s, color .15s;
+}
+.btn-bm:hover { border-color: var(--rot); color: var(--rot); }
+
+@media print { .bm-popup-overlay { display: none !important; } .btn-bm { display: none !important; } }</style>
 </head>
 <body>
 
@@ -598,38 +699,97 @@ body.printing textarea::placeholder { color: transparent !important; }
       </div>
     </div>
 
-    <!-- 05 VERLETZUNGEN -->
-    <div class="section" style="border-left-color:var(--c-verletz); flex:1; display:flex; flex-direction:column;">
+    <!-- 05 VERLETZUNGEN + BODYMAP -->
+    <div class="section" style="border-left-color:var(--c-verletz); flex:1.6; display:flex; flex-direction:column;">
       <div class="s-head">
         <span class="s-num" style="color:var(--c-verletz);">05</span>
-        <span class="s-title">Verletzungen</span>
+        <span class="s-title">Verletzungen &amp; Bodymap</span>
       </div>
-      <div class="s-body" style="flex:1; display:flex; flex-direction:column;">
-        <div class="sub-lbl">Verletzungsart (Mehrfachauswahl)</div>
-        <div class="cg-lg">
-          <label class="ci-lg"><input type="checkbox"> Polytrauma</label>
-          <label class="ci-lg"><input type="checkbox"> SHT (V.a.)</label>
-          <label class="ci-lg"><input type="checkbox"> Thoraxtrauma</label>
-          <label class="ci-lg"><input type="checkbox"> Abdominaltrauma</label>
-          <label class="ci-lg"><input type="checkbox"> Amputation</label>
-          <label class="ci-lg"><input type="checkbox"> Avulsion</label>
-          <label class="ci-lg"><input type="checkbox"> Fraktur (V.a.)</label>
-          <label class="ci-lg"><input type="checkbox"> Verbrennung</label>
-          <label class="ci-lg"><input type="checkbox"> Prellung</label>
-          <label class="ci-lg"><input type="checkbox"> Augenverletzung</label>
-          <label class="ci-lg"><input type="checkbox"> Schürfwunde</label>
-          <label class="ci-lg"><input type="checkbox"> Schnittverletztung</label>
-          <label class="ci-lg"><input type="checkbox"> Schusswunde</label>
+      <div class="s-body" style="flex:1; display:flex; flex-direction:column; gap:7px;">
+
+        <div style="display:flex; gap:12px; flex:1; min-height:0;">
+
+          <!-- SVG Bodymap — 5 Zonen -->
+          <div style="display:flex; flex-direction:column; align-items:center; gap:4px; flex-shrink:0;">
+            <div class="sub-lbl">Körperstelle anklicken</div>
+            <svg id="bm-svg" width="130" height="280" viewBox="0 0 130 280" style="display:block; overflow:visible;">
+
+              <!-- Kopf -->
+              <g id="bmg-Kopf" class="bm-zone" onclick="bmZoneClick('Kopf')">
+                <ellipse id="bms-Kopf-0" cx="65" cy="22" rx="20" ry="21" fill="#282828" stroke="#555" stroke-width="1.5"/>
+                <circle cx="57" cy="19" r="2" fill="#555" opacity=".5" pointer-events="none"/>
+                <circle cx="73" cy="19" r="2" fill="#555" opacity=".5" pointer-events="none"/>
+                <path d="M57 27 Q65 32 73 27" stroke="#555" stroke-width="1" opacity=".45" fill="none" pointer-events="none"/>
+                <text id="bmt-Kopf" x="65" y="22" text-anchor="middle" dominant-baseline="middle" font-family="IBM Plex Mono,monospace" font-size="8" font-weight="700" fill="#777" pointer-events="none">Kopf</text>
+              </g>
+
+              <!-- Hals dekorativ -->
+              <rect x="59" y="43" width="12" height="9" rx="2" fill="#282828" stroke="#555" stroke-width="1" pointer-events="none"/>
+
+              <!-- Torso (Thorax + Bauch zusammen) -->
+              <g id="bmg-Torso" class="bm-zone" onclick="bmZoneClick('Torso')">
+                <rect id="bms-Torso-0" x="36" y="52" width="58" height="80" rx="6" fill="#282828" stroke="#555" stroke-width="1.5"/>
+                <line x1="65" y1="54" x2="65" y2="130" stroke="#555" stroke-width=".6" opacity=".2" pointer-events="none"/>
+                <path d="M44 57 Q65 52 86 57" stroke="#555" stroke-width=".7" opacity=".2" fill="none" pointer-events="none"/>
+                <circle cx="65" cy="108" r="2" fill="#555" opacity=".25" pointer-events="none"/>
+                <text id="bmt-Torso" x="65" y="90" text-anchor="middle" dominant-baseline="middle" font-family="IBM Plex Mono,monospace" font-size="8" font-weight="700" fill="#777" pointer-events="none">Torso</text>
+              </g>
+
+              <!-- Hüfte dekorativ -->
+              <rect x="38" y="132" width="54" height="14" rx="3" fill="#282828" stroke="#555" stroke-width="1" pointer-events="none"/>
+
+              <!-- Linker Arm (3 Shapes) -->
+              <g id="bmg-LinkerArm" class="bm-zone" onclick="bmZoneClick('Linker Arm')">
+                <rect id="bms-LinkerArm-0" x="13" y="52" width="21" height="40" rx="7" fill="#282828" stroke="#555" stroke-width="1.5"/>
+                <rect id="bms-LinkerArm-1" x="12" y="94" width="19" height="34" rx="7" fill="#282828" stroke="#555" stroke-width="1.5"/>
+                <ellipse id="bms-LinkerArm-2" cx="21" cy="136" rx="10" ry="7" fill="#282828" stroke="#555" stroke-width="1.5"/>
+                <text id="bmt-LinkerArm" x="21" y="90" text-anchor="middle" dominant-baseline="middle" font-family="IBM Plex Mono,monospace" font-size="7" font-weight="700" fill="#777" pointer-events="none">li.Arm</text>
+              </g>
+
+              <!-- Rechter Arm (3 Shapes) -->
+              <g id="bmg-RechterArm" class="bm-zone" onclick="bmZoneClick('Rechter Arm')">
+                <rect id="bms-RechterArm-0" x="96" y="52" width="21" height="40" rx="7" fill="#282828" stroke="#555" stroke-width="1.5"/>
+                <rect id="bms-RechterArm-1" x="99" y="94" width="19" height="34" rx="7" fill="#282828" stroke="#555" stroke-width="1.5"/>
+                <ellipse id="bms-RechterArm-2" cx="109" cy="136" rx="10" ry="7" fill="#282828" stroke="#555" stroke-width="1.5"/>
+                <text id="bmt-RechterArm" x="109" y="90" text-anchor="middle" dominant-baseline="middle" font-family="IBM Plex Mono,monospace" font-size="7" font-weight="700" fill="#777" pointer-events="none">re.Arm</text>
+              </g>
+
+              <!-- Linkes Bein (3 Shapes) -->
+              <g id="bmg-LinkesBein" class="bm-zone" onclick="bmZoneClick('Linkes Bein')">
+                <rect id="bms-LinkesBein-0" x="38" y="147" width="23" height="50" rx="7" fill="#282828" stroke="#555" stroke-width="1.5"/>
+                <rect id="bms-LinkesBein-1" x="39" y="199" width="21" height="46" rx="7" fill="#282828" stroke="#555" stroke-width="1.5"/>
+                <ellipse id="bms-LinkesBein-2" cx="49" cy="252" rx="14" ry="7" fill="#282828" stroke="#555" stroke-width="1.5"/>
+                <text id="bmt-LinkesBein" x="49" y="172" text-anchor="middle" dominant-baseline="middle" font-family="IBM Plex Mono,monospace" font-size="7" font-weight="700" fill="#777" pointer-events="none">li.Bein</text>
+              </g>
+
+              <!-- Rechtes Bein (3 Shapes) -->
+              <g id="bmg-RechtesBein" class="bm-zone" onclick="bmZoneClick('Rechtes Bein')">
+                <rect id="bms-RechtesBein-0" x="69" y="147" width="23" height="50" rx="7" fill="#282828" stroke="#555" stroke-width="1.5"/>
+                <rect id="bms-RechtesBein-1" x="70" y="199" width="21" height="46" rx="7" fill="#282828" stroke="#555" stroke-width="1.5"/>
+                <ellipse id="bms-RechtesBein-2" cx="81" cy="252" rx="14" ry="7" fill="#282828" stroke="#555" stroke-width="1.5"/>
+                <text id="bmt-RechtesBein" x="81" y="172" text-anchor="middle" dominant-baseline="middle" font-family="IBM Plex Mono,monospace" font-size="7" font-weight="700" fill="#777" pointer-events="none">re.Bein</text>
+              </g>
+
+            </svg>
+            <div style="font-size:8px;color:var(--g5);font-style:italic;text-align:center;margin-top:2px;">Zone anklicken → Verletzung wählen</div>
+            <button class="btn-bm" onclick="bmClearAll()" style="margin-top:4px;">✕ Alle zurücksetzen</button>
+          </div>
+
+          <!-- Rechts: Legende + Beschreibung -->
+          <div style="flex:1; display:flex; flex-direction:column; gap:7px; min-width:0;">
+            <div class="sub-lbl">Eingetragene Verletzungen</div>
+            <div id="bm-legend-list" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px;">
+              <div class="bodymap-empty" id="bm-empty-hint">Körperstelle anklicken um Verletzungen einzutragen</div>
+            </div>
+            <div class="divider"></div>
+            <div class="f"><label>Schmerzskala NRS 0–10</label><input type="number" min="0" max="10" placeholder="0–10"></div>
+            <div class="f" style="flex:1; display:flex; flex-direction:column;">
+              <label>Beschreibung / Besonderheiten</label>
+              <textarea style="flex:1; min-height:50px; resize:none; font-size:12px;" placeholder="Genaue Beschreibung der Verletzungen …"></textarea>
+            </div>
+          </div>
         </div>
-        <div class="divider"></div>
-        <div class="g2">
-          <div class="f"><label>Lokalisation</label><input type="text" placeholder="li. Unterschenkel, Kopf …"></div>
-          <div class="f"><label>Schmerzskala NRS 0–10</label><input type="number" min="0" max="10" placeholder="0–10"></div>
-        </div>
-        <div class="f" style="flex:1; display:flex; flex-direction:column; margin-top:6px;">
-          <label>Beschreibung / Besonderheiten</label>
-          <textarea style="flex:1; min-height:40px; resize:none; font-size:12px;" placeholder="Genaue Beschreibung der Verletztungen …"></textarea>
-        </div>
+
       </div>
     </div>
 
@@ -1182,7 +1342,159 @@ function toggleTheme() {
     : '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';
 }
 
-// ── Vitalzeichen-Ampel ──
+// ── BODYMAP — Zone-click system ──
+var BM_TYPES = [
+  'Polytrauma',
+  'Prellung','Schürfwunde', 'Fraktur', 'SHT (Schädel-Hirn-Trauma)',
+  'Stichverletzung', 'Schnittverletzung', 'Schusswunde',
+  'Verbrennung', 'Amputation','Avulsion', 'Augenverletzung',
+  'Sonstiges'
+];
+
+var bmZoneData = {};
+
+// Each zone: which shape IDs belong to it, and the label ID
+var BM_ZONES = {
+  'Kopf':        { shapes: ['bms-Kopf-0'],        label: 'bmt-Kopf',        shapeCount: 1 },
+  'Torso':       { shapes: ['bms-Torso-0'],        label: 'bmt-Torso',       shapeCount: 1 },
+  'Linker Arm':  { shapes: ['bms-LinkerArm-0','bms-LinkerArm-1','bms-LinkerArm-2'],   label: 'bmt-LinkerArm',  shapeCount: 3 },
+  'Rechter Arm': { shapes: ['bms-RechterArm-0','bms-RechterArm-1','bms-RechterArm-2'],label: 'bmt-RechterArm', shapeCount: 3 },
+  'Linkes Bein': { shapes: ['bms-LinkesBein-0','bms-LinkesBein-1','bms-LinkesBein-2'],  label: 'bmt-LinkesBein', shapeCount: 3 },
+  'Rechtes Bein':{ shapes: ['bms-RechtesBein-0','bms-RechtesBein-1','bms-RechtesBein-2'],label:'bmt-RechtesBein',shapeCount: 3 }
+};
+
+var BM_COL_IDLE    = '#282828';
+var BM_STR_IDLE    = '#555';
+var BM_COL_INJURY  = 'rgba(192,57,43,0.32)';
+var BM_STR_INJURY  = '#C0392B';
+var BM_LBL_IDLE    = '#777';
+var BM_LBL_INJURY  = '#C0392B';
+
+function bmApplyStyle(zone, hasInjury) {
+  var cfg = BM_ZONES[zone];
+  if (!cfg) return;
+  var fill   = hasInjury ? BM_COL_INJURY : BM_COL_IDLE;
+  var stroke = hasInjury ? BM_STR_INJURY : BM_STR_IDLE;
+  var sw     = hasInjury ? '2.5' : '1.5';
+  var lblFill= hasInjury ? BM_LBL_INJURY : BM_LBL_IDLE;
+  cfg.shapes.forEach(function(sid) {
+    var el = document.getElementById(sid);
+    if (!el) return;
+    el.setAttribute('fill',   fill);
+    el.setAttribute('stroke', stroke);
+    el.setAttribute('stroke-width', sw);
+  });
+  var lbl = document.getElementById(cfg.label);
+  if (lbl) lbl.setAttribute('fill', lblFill);
+}
+
+// Hover effect via mouseenter/mouseleave — set up once after DOM ready
+function bmInitHover() {
+  Object.keys(BM_ZONES).forEach(function(zone) {
+    var cfg = BM_ZONES[zone];
+    var gid = 'bmg-' + zone.replace(/\s+/g,'');
+    var g = document.getElementById(gid);
+    if (!g) return;
+    g.addEventListener('mouseenter', function() {
+      if (bmZoneData[zone] && bmZoneData[zone].length) return; // already red
+      cfg.shapes.forEach(function(sid) {
+        var el = document.getElementById(sid);
+        if (el) { el.setAttribute('fill','rgba(192,57,43,0.14)'); el.setAttribute('stroke','#C0392B'); }
+      });
+    });
+    g.addEventListener('mouseleave', function() {
+      if (bmZoneData[zone] && bmZoneData[zone].length) return;
+      cfg.shapes.forEach(function(sid) {
+        var el = document.getElementById(sid);
+        if (el) { el.setAttribute('fill', BM_COL_IDLE); el.setAttribute('stroke', BM_STR_IDLE); }
+      });
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', bmInitHover);
+
+function bmZoneClick(zone) {
+  var overlay = document.createElement('div');
+  overlay.className = 'bm-popup-overlay';
+  var current = bmZoneData[zone] || [];
+  var checksHtml = BM_TYPES.map(function(t) {
+    var checked = current.indexOf(t) !== -1;
+    return '<label class="bm-popup-ci' + (checked ? ' checked' : '') + '">' +
+      '<input type="checkbox" value="' + t + '"' + (checked ? ' checked' : '') + ' onchange="bmPopupCheck(this)">' +
+      t + '</label>';
+  }).join('');
+  overlay.innerHTML =
+    '<div class="bm-popup">' +
+      '<div class="bm-popup-title">⊕ ' + zone + '</div>' +
+      '<div class="bm-popup-sub">Verletzungsart — Mehrfachauswahl</div>' +
+      '<div class="bm-popup-checks">' + checksHtml + '</div>' +
+      '<div class="bm-popup-btns">' +
+        '<button class="bm-btn-cancel" id="bm-cancel">Abbrechen</button>' +
+        '<button class="bm-btn-ok" id="bm-ok">Übernehmen</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+  document.getElementById('bm-ok').onclick = function() {
+    var selected = [];
+    overlay.querySelectorAll('input[type="checkbox"]:checked').forEach(function(cb) { selected.push(cb.value); });
+    if (selected.length > 0) { bmZoneData[zone] = selected; } else { delete bmZoneData[zone]; }
+    bmClosePopup(overlay);
+    bmRenderAll();
+  };
+  document.getElementById('bm-cancel').onclick = function() { bmClosePopup(overlay); };
+  overlay.addEventListener('click', function(e) { if (e.target === overlay) bmClosePopup(overlay); });
+}
+
+function bmPopupCheck(cb) {
+  var lbl = cb.closest('.bm-popup-ci');
+  if (lbl) lbl.classList.toggle('checked', cb.checked);
+}
+
+function bmClosePopup(overlay) {
+  overlay.style.opacity = '0'; overlay.style.transition = 'opacity .13s';
+  setTimeout(function() { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); }, 140);
+}
+
+function bmRenderAll() {
+  Object.keys(BM_ZONES).forEach(function(zone) {
+    var hasData = !!(bmZoneData[zone] && bmZoneData[zone].length > 0);
+    bmApplyStyle(zone, hasData);
+  });
+  bmRenderLegend();
+}
+
+function bmRenderLegend() {
+  var list = document.getElementById('bm-legend-list');
+  if (!list) return;
+  list.innerHTML = '';
+  var zones = Object.keys(bmZoneData);
+  if (zones.length === 0) {
+    list.innerHTML = '<div class="bodymap-empty">Körperstelle anklicken um Verletzungen einzutragen</div>';
+    return;
+  }
+  zones.forEach(function(zone) {
+    var types = bmZoneData[zone];
+    if (!types || !types.length) return;
+    var entry = document.createElement('div');
+    entry.className = 'bm-legend-entry';
+    entry.innerHTML =
+      '<div class="bm-legend-zone">' + escHtml(zone) + '</div>' +
+      '<div class="bm-legend-types">' + types.map(escHtml).join(', ') + '</div>' +
+      '<button class="bm-legend-del" title="Entfernen" onclick="bmRemoveZone(\'' + zone.replace(/'/g,"\\'") + '\')">✕</button>';
+    list.appendChild(entry);
+  });
+}
+
+function bmRemoveZone(zone) { delete bmZoneData[zone]; bmRenderAll(); }
+
+function bmClearAll() { bmZoneData = {}; bmRenderAll(); }
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+
 // Grenzwerte:
 //   RR syst.:  OK 90–139 | WARN 140–179 oder 80–89 | CRIT ≥180 oder <80
 //   RR diast.: OK 60–89  | WARN 90–109 oder 50–59  | CRIT ≥110 oder <50
