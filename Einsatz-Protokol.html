@@ -555,7 +555,185 @@ body.printing textarea::placeholder { color: transparent !important; }
 }
 .btn-bm:hover { border-color: var(--rot); color: var(--rot); }
 
-@media print { .bm-popup-overlay { display: none !important; } .btn-bm { display: none !important; } }</style>
+@media print { .bm-popup-overlay { display: none !important; } .btn-bm { display: none !important; } }
+
+/* ══ LOG-IMPORT MODAL ══ */
+.log-import-overlay {
+  position: fixed; inset: 0; z-index: 9000;
+  background: rgba(0,0,0,.7);
+  display: flex; align-items: center; justify-content: center;
+  animation: warnFadeIn .18s ease;
+}
+.log-import-box {
+  background: #1a1a1a;
+  border: 2px solid #C0392B;
+  border-radius: 6px;
+  padding: 0;
+  width: 96%; max-width: 720px;
+  max-height: 90vh;
+  display: flex; flex-direction: column;
+  box-shadow: 0 0 60px rgba(192,57,43,.3), 0 12px 48px rgba(0,0,0,.8);
+  animation: warnPop .22s cubic-bezier(.34,1.56,.64,1);
+  overflow: hidden;
+}
+[data-theme="light"] .log-import-box { background: #fff; }
+.log-import-head {
+  background: #111;
+  border-bottom: 1px solid #333;
+  padding: 14px 20px 12px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+[data-theme="light"] .log-import-head { background: #f4f3f1; border-color: #ddd; }
+.log-import-title {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px; font-weight: 800; letter-spacing: .1em;
+  text-transform: uppercase; color: #C0392B;
+  display: flex; align-items: center; gap: 8px;
+}
+.log-import-title svg { width: 16px; height: 16px; flex-shrink: 0; }
+.log-import-close {
+  background: transparent; border: 1px solid #444; color: #777;
+  cursor: pointer; font-size: 14px; width: 26px; height: 26px;
+  border-radius: 3px; display: flex; align-items: center; justify-content: center;
+  transition: border-color .12s, color .12s;
+}
+.log-import-close:hover { border-color: #C0392B; color: #C0392B; }
+.log-import-body { padding: 16px 20px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+.log-import-hint {
+  font-size: 10px; color: #888; line-height: 1.55;
+  background: rgba(255,255,255,.04); border: 1px solid #2a2a2a;
+  border-left: 3px solid #555; padding: 8px 10px; border-radius: 2px;
+}
+[data-theme="light"] .log-import-hint { background: #f4f3f1; border-color: #ddd; color: #666; }
+.log-import-hint code {
+  font-family: 'IBM Plex Mono', monospace; font-size: 9px;
+  color: #aaa; background: rgba(255,255,255,.07); padding: 1px 4px; border-radius: 2px;
+}
+[data-theme="light"] .log-import-hint code { color: #555; background: #e8e3dc; }
+
+.log-cfg-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px;
+}
+.log-cfg-item { display: flex; flex-direction: column; gap: 3px; }
+.log-cfg-label {
+  font-size: 8px; font-weight: 700; letter-spacing: .09em;
+  text-transform: uppercase; color: #777;
+}
+.log-cfg-item select, .log-cfg-item input[type="text"] {
+  border: 1px solid #333; background: #222; color: #ccc;
+  padding: 5px 7px; font-family: 'IBM Plex Sans', sans-serif; font-size: 11px;
+  outline: none; transition: border-color .12s;
+}
+.log-cfg-item select:focus, .log-cfg-item input:focus { border-color: #C0392B; }
+[data-theme="light"] .log-cfg-item select,
+[data-theme="light"] .log-cfg-item input[type="text"] {
+  background: #f4f3f1; border-color: #ccc; color: #1a1a1a;
+}
+
+/* custom keywords editor */
+.log-kw-section { display: flex; flex-direction: column; gap: 6px; }
+.log-kw-title { font-size: 8px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; color: #777; }
+.log-kw-tabs { display: flex; gap: 4px; }
+.log-kw-tab {
+  font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  padding: 4px 12px; cursor: pointer; border: 1px solid #333;
+  background: transparent; color: #666; border-radius: 2px; transition: all .12s;
+}
+.log-kw-tab.active { background: rgba(192,57,43,.15); border-color: #C0392B; color: #C0392B; }
+.log-kw-panel { display: none; flex-direction: column; gap: 5px; }
+.log-kw-panel.active { display: flex; }
+.log-kw-list { display: flex; flex-wrap: wrap; gap: 4px; min-height: 28px; padding: 4px; background: #111; border: 1px solid #2a2a2a; border-radius: 2px; }
+[data-theme="light"] .log-kw-list { background: #f4f3f1; border-color: #ddd; }
+.log-kw-tag {
+  display: flex; align-items: center; gap: 4px;
+  background: rgba(255,255,255,.07); border: 1px solid #333;
+  color: #bbb; font-size: 9px; font-family: 'IBM Plex Mono', monospace;
+  padding: 2px 7px 2px 8px; border-radius: 2px;
+}
+[data-theme="light"] .log-kw-tag { background: #e8e3dc; border-color: #ccc; color: #333; }
+.log-kw-tag-del {
+  background: none; border: none; color: #666; cursor: pointer;
+  font-size: 11px; line-height: 1; padding: 0; transition: color .1s;
+}
+.log-kw-tag-del:hover { color: #C0392B; }
+.log-kw-add-row { display: flex; gap: 5px; }
+.log-kw-add-row input {
+  flex: 1; border: 1px solid #333; background: #222; color: #ccc;
+  padding: 4px 7px; font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+  outline: none; transition: border-color .12s;
+}
+[data-theme="light"] .log-kw-add-row input { background: #f4f3f1; border-color: #ccc; color: #1a1a1a; }
+.log-kw-add-row input:focus { border-color: #C0392B; }
+.log-kw-add-btn {
+  background: #333; border: 1px solid #444; color: #aaa;
+  padding: 4px 11px; cursor: pointer; font-size: 10px; font-weight: 700;
+  transition: background .12s, color .12s;
+}
+.log-kw-add-btn:hover { background: #C0392B; border-color: #C0392B; color: #fff; }
+
+/* textarea */
+.log-import-ta {
+  width: 100%; min-height: 200px; max-height: 340px;
+  border: 1px solid #383838; background: #141414;
+  color: #d0d0d0; font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+  line-height: 1.55; padding: 8px 10px; resize: vertical; outline: none;
+  transition: border-color .12s;
+}
+.log-import-ta:focus { border-color: #C0392B; }
+[data-theme="light"] .log-import-ta { background: #f4f3f1; border-color: #ccc; color: #1a1a1a; }
+
+/* preview */
+.log-preview-box { display: none; flex-direction: column; gap: 6px; }
+.log-preview-box.visible { display: flex; }
+.log-preview-title { font-size: 9px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; color: #52b788; }
+.log-preview-item {
+  background: rgba(82,183,136,.06); border: 1px solid rgba(82,183,136,.2);
+  border-left: 3px solid #52b788;
+  padding: 8px 12px; font-size: 12px; color: #ccc; line-height: 1.6;
+  border-radius: 2px;
+}
+[data-theme="light"] .log-preview-item { background: rgba(26,122,94,.06); border-color: rgba(26,122,94,.2); border-left-color: #1A7A5E; color: #333; }
+.log-preview-item strong { color: #52b788; font-weight: 700; font-size: 12px; }
+[data-theme="light"] .log-preview-item strong { color: #1A7A5E; }
+.log-preview-item .li-dest { color: #bbb; font-size: 11px; font-family: 'IBM Plex Mono', monospace; }
+[data-theme="light"] .log-preview-item .li-dest { color: #555; }
+.log-preview-none { color: #666; font-size: 10px; font-style: italic; }
+
+.log-import-footer {
+  padding: 12px 20px; border-top: 1px solid #2a2a2a;
+  display: flex; gap: 8px; justify-content: flex-end; flex-shrink: 0;
+  background: #111;
+}
+[data-theme="light"] .log-import-footer { background: #f4f3f1; border-color: #ddd; }
+.btn-log-parse {
+  background: #1A6B9A; border: 1px solid #1A6B9A; color: #fff;
+  font-family: 'IBM Plex Sans', sans-serif; font-size: 10px; font-weight: 700;
+  letter-spacing: .07em; text-transform: uppercase; padding: 7px 18px;
+  cursor: pointer; transition: background .12s;
+}
+.btn-log-parse:hover { background: #155a82; }
+.btn-log-apply {
+  background: #C0392B; border: 1px solid #C0392B; color: #fff;
+  font-family: 'IBM Plex Sans', sans-serif; font-size: 10px; font-weight: 700;
+  letter-spacing: .07em; text-transform: uppercase; padding: 7px 18px;
+  cursor: pointer; transition: background .12s; display: none;
+}
+.btn-log-apply.visible { display: block; }
+.btn-log-apply:hover { background: #922B21; }
+.btn-log-cancel {
+  background: transparent; border: 1px solid #444; color: #777;
+  font-family: 'IBM Plex Sans', sans-serif; font-size: 10px; font-weight: 600;
+  letter-spacing: .06em; text-transform: uppercase; padding: 7px 14px;
+  cursor: pointer; transition: border-color .12s, color .12s;
+}
+.btn-log-cancel:hover { border-color: #888; color: #aaa; }
+
+/* Topbar import button */
+.btn-import { background: #1A7A5E; border-color: #1A7A5E; color: #fff !important; }
+.btn-import:hover { background: #155f4a !important; border-color: #155f4a !important; }
+@media print { .log-import-overlay { display: none !important; } }
+</style>
 </head>
 <body>
 
@@ -1538,12 +1716,502 @@ function checkVital(el) {
   el.classList.add('vt-' + state);
 }
 
+// ══════════════════════════════════════════════════════
+// FiveM Log-Import System
+// ══════════════════════════════════════════════════════
+
+// ── Keyword-Konfiguration (erweiterbar) ──
+var LOG_CONFIG = {
+  // Verbände / Maßnahmen → Sonstige Maßnahmen (mit Zeitstempel)
+  verband: [
+    'Verband Elastische Binde',
+    'Verband Pflaster',
+    'Verband Verbandpäckchen',
+    'Verband Mullbinde',
+    'Verband Kompresse',
+    'Tourniquet',
+    'Druckverband',
+    'Nähset'
+  ],
+  // Medikamente / Infusionen → Medikamentengabe
+  medikament: [
+    'Infusion Blut',
+    'Infusion NaCl',
+    'Infusion Ringer',
+    'Infusion Glucose',
+    'Morphin',
+    'Fentanyl',
+    'Ketamin',
+    'Esketamin',
+    'Midazolam',
+    'Propofol',
+    'Tavor',
+    'Diazepam',
+    'Atropin',
+    'Adrenalin',
+    'Akrinor',
+    'Epinephrin',
+    'Noradrenalin',
+    'Urapidil',
+    'Tranexamsäure',
+    'Heparin',
+    'Penicillin',
+    'Tilidin',
+    'Ibuprofen',
+    'Paracetamol',
+    'ASS',
+    'Naloxon',
+    'Vomex',
+    'Nitro',
+    'Antidot',
+    'Glucose G40',
+    'Glucose G20',
+    'Blut'
+  ],
+  // Vitalzeichen → Vitalzeichen-Verlauf Tabelle
+  puls: ['Puls wurde gemessen', 'Herzfrequenz wurde gemessen', 'Herzfrequenz gemessen'],
+  blutdruck: ['Blutdruck wurde gemessen', 'Blutdruck gemessen', 'RR wurde gemessen']
+};
+
+// Infusionsmengen-Erkennung: z.B. "(250ml)" → zeigt Menge an
+function extractInfusionMl(line) {
+  var m = line.match(/\((\d+)\s*ml\)/i);
+  return m ? m[1] + 'ml' : null;
+}
+
+// Zeitstempel aus Log-Zeile extrahieren [HH:MM:SS]
+function extractTimestamp(line) {
+  var m = line.match(/^\[(\d{2}:\d{2}:\d{2})\]/);
+  return m ? m[1].substring(0, 5) : null; // HH:MM
+}
+
+// Körperteil-Erkennung
+var BODY_PARTS = ['Rechter Arm','Rechtes Bein','Linker Arm','Linkes Bein','Brustkorb','Kopf','Torso','Bauch','Brust','Hals','Rücken'];
+
+function extractBodyPart(line) {
+  for (var i = 0; i < BODY_PARTS.length; i++) {
+    if (line.indexOf(BODY_PARTS[i]) !== -1) return BODY_PARTS[i];
+  }
+  return null;
+}
+
+// Prüft ob Zeile einem Keyword-Array entspricht
+function matchesKeyword(line, keywords) {
+  var lower = line.toLowerCase();
+  for (var i = 0; i < keywords.length; i++) {
+    if (lower.indexOf(keywords[i].toLowerCase()) !== -1) return keywords[i];
+  }
+  return null;
+}
+
+// ── Parse-Logik ──
+function parseLogLines(rawText) {
+  var lines = rawText.split('\n');
+  var results = { vitals: [], meds: [], verbände: [], sonstige: [] };
+
+  lines.forEach(function(line) {
+    line = line.trim();
+    if (!line) return;
+
+    var ts = extractTimestamp(line);
+    var cleanLine = ts ? line.substring(11).trim() : line; // ohne [HH:MM:SS]
+
+    // 1) Puls
+    var isPuls = matchesKeyword(line, LOG_CONFIG.puls);
+    if (isPuls) {
+      var pulsVal = null;
+      var pulsMatch = line.match(/:\s*(\d+)\s*Schläge/i) || line.match(/:\s*(\d+)\s*bpm/i) || line.match(/(\d+)\s*\/\s*min/i);
+      if (pulsMatch) pulsVal = pulsMatch[1];
+      var bp = extractBodyPart(line);
+      results.vitals.push({ type: 'puls', time: ts, value: pulsVal, part: bp, raw: cleanLine });
+      return;
+    }
+
+    // 2) Blutdruck
+    var isRR = matchesKeyword(line, LOG_CONFIG.blutdruck);
+    if (isRR) {
+      var rrSyst = null, rrDiast = null;
+      var rrMatch = line.match(/(\d+)\s*\/\s*(\d+)\s*mmHg/i) || line.match(/(\d+)\s*\/\s*(\d+)/);
+      if (rrMatch) { rrSyst = rrMatch[1]; rrDiast = rrMatch[2]; }
+      var bpPart = extractBodyPart(line);
+      results.vitals.push({ type: 'rr', time: ts, syst: rrSyst, diast: rrDiast, part: bpPart, raw: cleanLine });
+      return;
+    }
+
+    // 3) Medikamente / Infusionen
+    var isMed = matchesKeyword(line, LOG_CONFIG.medikament);
+    if (isMed) {
+      var ml = extractInfusionMl(line);
+      var medName = isMed + (ml ? ' ' + ml : '');
+      var medPart = extractBodyPart(line);
+      // Applikation raten
+      var applikation = 'Intravenöser Zugang (I.V.)';
+      if (/oral|mund|schluck/i.test(line)) applikation = 'Oral (p.o.)';
+      if (/inhalat|maske|atem/i.test(line)) applikation = 'Inhalativ';
+      if (/i\.o\.|intraoss/i.test(line)) applikation = 'Intraossärer Zugang (I.O.)';
+      if (/s\.c\.|subkutan/i.test(line)) applikation = 'Subkutan (s.c.)';
+      results.meds.push({ time: ts, name: medName, applikation: applikation, part: medPart, raw: cleanLine });
+      return;
+    }
+
+    // 4) Verbände / Maßnahmen
+    var isVerband = matchesKeyword(line, LOG_CONFIG.verband);
+    if (isVerband) {
+      var vPart = extractBodyPart(line);
+      results.verbände.push({ time: ts, name: isVerband, part: vPart, raw: cleanLine });
+      return;
+    }
+
+    // 5) Alles andere mit Zeitstempel → Sonstige
+    if (ts && line.length > 11) {
+      results.sonstige.push({ time: ts, raw: cleanLine });
+    }
+  });
+
+  return results;
+}
+
+// ── Vorschau rendern ──
+function renderPreview(parsed) {
+  var box = document.getElementById('logPreviewBox');
+  var out = '';
+  var total = parsed.vitals.length + parsed.meds.length + parsed.verbände.length + parsed.sonstige.length;
+
+  if (total === 0) {
+    box.innerHTML = '<div class="log-preview-none">Keine erkannten Einträge. Bitte überprüfe das Format der Logs.</div>';
+    box.className = 'log-preview-box visible';
+    document.getElementById('btnLogApply').classList.remove('visible');
+    return;
+  }
+
+  // Vitalzeichen
+  if (parsed.vitals.length > 0) {
+    out += '<div class="log-preview-item"><strong>Vitalzeichen-Verlauf (' + parsed.vitals.length + ' Messung(en))</strong><br>';
+    parsed.vitals.forEach(function(v) {
+      if (v.type === 'puls') {
+        out += '<span class="li-dest">[' + (v.time||'?') + '] Puls: ' + (v.value ? v.value + ' /min' : 'Wert nicht erkannt') + (v.part ? ' am ' + v.part : '') + '</span><br>';
+      } else {
+        out += '<span class="li-dest">[' + (v.time||'?') + '] RR: ' + (v.syst||'?') + '/' + (v.diast||'?') + ' mmHg' + (v.part ? ' am ' + v.part : '') + '</span><br>';
+      }
+    });
+    out += '</div>';
+  }
+
+  // Medikamente
+  if (parsed.meds.length > 0) {
+    out += '<div class="log-preview-item"><strong>Medikamentengabe (' + parsed.meds.length + ' Eintrag/Einträge)</strong><br>';
+    parsed.meds.forEach(function(m) {
+      out += '<span class="li-dest">[' + (m.time||'?') + '] ' + m.name + ' · ' + m.applikation + '</span><br>';
+    });
+    out += '</div>';
+  }
+
+  // Verbände
+  if (parsed.verbände.length > 0) {
+    out += '<div class="log-preview-item"><strong>Verbände / Maßnahmen → Sonstige Maßnahmen (' + parsed.verbände.length + ')</strong><br>';
+    parsed.verbände.forEach(function(v) {
+      out += '<span class="li-dest">[' + (v.time||'?') + '] ' + v.name + (v.part ? ' am ' + v.part : '') + '</span><br>';
+    });
+    out += '</div>';
+  }
+
+  // Sonstige
+  if (parsed.sonstige.length > 0) {
+    out += '<div class="log-preview-item"><strong>Sonstige Maßnahmen / Besonderheiten (' + parsed.sonstige.length + ')</strong><br>';
+    parsed.sonstige.forEach(function(s) {
+      out += '<span class="li-dest">[' + s.time + '] ' + escHtml(s.raw) + '</span><br>';
+    });
+    out += '</div>';
+  }
+
+  box.innerHTML = out;
+  box.className = 'log-preview-box visible';
+  document.getElementById('btnLogApply').classList.add('visible');
+}
+
+// ── Daten eintragen ──
+// Helper: findet Checkbox anhand des sichtbaren Labels
+function setCheckboxByLabel(labelText) {
+  var boxes = document.querySelectorAll('.ci-lg input[type="checkbox"]');
+  for (var i = 0; i < boxes.length; i++) {
+    var lbl = boxes[i].closest('label');
+    if (lbl && lbl.textContent.trim().indexOf(labelText) !== -1) {
+      boxes[i].checked = true;
+      return true;
+    }
+  }
+  return false;
+}
+
+function applyParsedLog(parsed) {
+  // ── Vitale Werte eintragen ──
+  var vtRows = [
+    { time: 'vt1_time', syst: 'vt1_rr_syst', diast: 'vt1_rr_diast', puls: 'vt1_puls' },
+    { time: 'vt2_time', syst: 'vt2_rr_syst', diast: 'vt2_rr_diast', puls: 'vt2_puls' }
+  ];
+
+  var vtByTime = {};
+  parsed.vitals.forEach(function(v) {
+    var key = v.time || 'x';
+    if (!vtByTime[key]) vtByTime[key] = {};
+    if (v.type === 'puls') { vtByTime[key].puls = v.value; vtByTime[key].time = v.time; }
+    if (v.type === 'rr')   { vtByTime[key].syst = v.syst; vtByTime[key].diast = v.diast; vtByTime[key].time = v.time; }
+  });
+  var vtEntries = Object.values(vtByTime);
+
+  var usedRows = 0;
+  for (var i = 0; i < vtEntries.length && i < vtRows.length; i++) {
+    var row = vtRows[i];
+    var entry = vtEntries[i];
+    if (entry.time) setFieldVal(row.time, entry.time);
+    if (entry.syst)  { setFieldVal(row.syst, entry.syst); triggerInput(row.syst); }
+    if (entry.diast) { setFieldVal(row.diast, entry.diast); triggerInput(row.diast); }
+    if (entry.puls)  { setFieldVal(row.puls, entry.puls); triggerInput(row.puls); }
+    usedRows++;
+  }
+
+  if (vtEntries.length > vtRows.length) {
+    var allVtBodies = document.querySelectorAll('.vt tbody');
+    var mainVtBody = allVtBodies[0];
+    for (var j = usedRows; j < vtEntries.length; j++) {
+      var e = vtEntries[j];
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td><div class="vt-time-cell"><input type="text" value="' + (e.time||'') + '"><button class="btn-now" onclick="setNow(this.previousElementSibling)">⏱Zeit</button></div></td>' +
+        '<td><input type="text" value="' + (e.syst||'') + '" data-vt="rr-syst" oninput="checkVital(this)"></td>' +
+        '<td><input type="text" value="' + (e.diast||'') + '" data-vt="rr-diast" oninput="checkVital(this)"></td>' +
+        '<td><input type="text" value="' + (e.puls||'') + '" data-vt="puls" oninput="checkVital(this)"></td>' +
+        '<td><input type="text" data-vt="spo2" oninput="checkVital(this)"></td>';
+      if (mainVtBody) mainVtBody.appendChild(tr);
+      tr.querySelectorAll('[data-vt]').forEach(function(inp) { if (inp.value) checkVital(inp); });
+    }
+  }
+
+  // ── Medikamente eintragen ──
+  var hasInfusion = false;
+  parsed.meds.forEach(function(med, idx) {
+    var tbody = document.getElementById('med-tbody');
+    if (!tbody) return;
+    var rows = tbody.querySelectorAll('tr');
+    var tr;
+    if (idx < rows.length) {
+      tr = rows[idx];
+    } else {
+      addMedRow();
+      rows = tbody.querySelectorAll('tr');
+      tr = rows[rows.length - 1];
+    }
+    var cells = tr.querySelectorAll('td');
+    if (cells[0]) { var inp = cells[0].querySelector('input'); if (inp) inp.value = med.name; }
+    if (cells[1]) {
+      var sel = cells[1].querySelector('select');
+      if (sel) {
+        for (var oi = 0; oi < sel.options.length; oi++) {
+          if (sel.options[oi].text === med.applikation) { sel.selectedIndex = oi; break; }
+        }
+      }
+    }
+    if (cells[2]) {
+      var tInp = cells[2].querySelector('input');
+      if (tInp && med.time) tInp.value = med.time;
+    }
+    // Prüfen ob es eine Infusion ist → Checkbox "Infusion" setzen
+    if (/^Infusion/i.test(med.name)) hasInfusion = true;
+  });
+  if (hasInfusion) setCheckboxByLabel('Infusion');
+
+  // ── Verbände → Checkboxen + Sonstige Maßnahmen ──
+  var hasTourniquet = false;
+  var hasVerband    = false;
+  parsed.verbände.forEach(function(v) {
+    var nameLow = v.name.toLowerCase();
+    if (nameLow.indexOf('tourniquet') !== -1) hasTourniquet = true;
+    if (nameLow.indexOf('verband') !== -1 || nameLow.indexOf('pflaster') !== -1 ||
+        nameLow.indexOf('kompresse') !== -1 || nameLow.indexOf('mullbinde') !== -1 ||
+        nameLow.indexOf('druckverband') !== -1 || nameLow.indexOf('nähset') !== -1) {
+      hasVerband = true;
+    }
+  });
+  if (hasTourniquet)  setCheckboxByLabel('Tourniquet');
+  if (hasVerband)     setCheckboxByLabel('Wundversorgung');
+
+  // ── Sonstige Maßnahmen Textarea ──
+  var sonsTa = document.querySelector('textarea[placeholder*="Weitere Maßnahmen"]');
+  if (sonsTa) {
+    var existing = sonsTa.value.trim();
+    var lines = [];
+    parsed.verbände.forEach(function(v) {
+      lines.push('[' + (v.time||'?') + '] ' + v.name + (v.part ? ' am ' + v.part : ''));
+    });
+    parsed.sonstige.forEach(function(s) {
+      lines.push('[' + s.time + '] ' + s.raw);
+    });
+    if (lines.length > 0) {
+      sonsTa.value = (existing ? existing + '\n' : '') + lines.join('\n');
+    }
+  }
+}
+
+function setFieldVal(id, val) {
+  var el = document.getElementById(id);
+  if (el) el.value = val;
+}
+function triggerInput(id) {
+  var el = document.getElementById(id);
+  if (el && typeof checkVital === 'function') checkVital(el);
+}
+
+// ── Modal UI ──
+var _logParsed = null;
+var _logKwPanelActive = 'verband';
+
+function openLogImport() {
+  if (document.getElementById('logImportOverlay')) return;
+  var overlay = document.createElement('div');
+  overlay.className = 'log-import-overlay';
+  overlay.id = 'logImportOverlay';
+
+  overlay.innerHTML =
+    '<div class="log-import-box">' +
+      '<div class="log-import-head">' +
+        '<div class="log-import-title">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
+            '<path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>' +
+          '</svg>' +
+          'FiveM Maßnahmen-Log importieren' +
+        '</div>' +
+        '<button class="log-import-close" onclick="closeLogImport()">✕</button>' +
+      '</div>' +
+      '<div class="log-import-body">' +
+
+        '<div class="log-import-hint">' +
+          'Maßnahmen-Logs aus dem FiveM Gesundheitsmenü (visn_are) hier einfügen.<br>' +
+          'Format: <code>[HH:MM:SS] Aktion wurde durchgeführt am Körperteil</code><br>' +
+          'Erkannte Kategorien: Verbände → Sonstige Maßnahmen · Medikamente/Infusionen → Medikamentengabe · Puls/Blutdruck → Vitalzeichen-Verlauf' +
+        '</div>' +
+
+        '<div class="log-kw-section">' +
+          '<div class="log-kw-title">Erkennungs-Schlüsselwörter (anpassen)</div>' +
+          '<div class="log-kw-tabs">' +
+            '<button class="log-kw-tab active" id="kwTab-verband" onclick="switchKwTab(\'verband\')">Verbände</button>' +
+            '<button class="log-kw-tab" id="kwTab-medikament" onclick="switchKwTab(\'medikament\')">Medikamente</button>' +
+          '</div>' +
+          '<div class="log-kw-panel active" id="kwPanel-verband">' +
+            '<div id="kwList-verband" class="log-kw-list"></div>' +
+            '<div class="log-kw-add-row"><input type="text" id="kwInput-verband" placeholder="Neues Keyword …" onkeydown="if(event.key===\'Enter\')addKw(\'verband\')"><button class="log-kw-add-btn" onclick="addKw(\'verband\')">+ Hinzufügen</button></div>' +
+          '</div>' +
+          '<div class="log-kw-panel" id="kwPanel-medikament">' +
+            '<div id="kwList-medikament" class="log-kw-list"></div>' +
+            '<div class="log-kw-add-row"><input type="text" id="kwInput-medikament" placeholder="Neues Keyword …" onkeydown="if(event.key===\'Enter\')addKw(\'medikament\')"><button class="log-kw-add-btn" onclick="addKw(\'medikament\')">+ Hinzufügen</button></div>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="f" style="display:flex;flex-direction:column;gap:3px;">' +
+          '<label style="font-size:8px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--g4);">Log-Einträge einfügen</label>' +
+          '<textarea class="log-import-ta" id="logTextarea" placeholder="[18:44:07] Verband Elastische Binde wurde angelegt am Rechter Arm&#10;[18:45:56] Puls wurde gemessen am Rechter Arm: 80 Schläge pro Minute&#10;[17:39:56] Infusion Blut (250ml) wurde gegeben am Rechter Arm&#10;..."></textarea>' +
+        '</div>' +
+
+        '<div class="log-preview-box" id="logPreviewBox"></div>' +
+
+      '</div>' +
+      '<div class="log-import-footer">' +
+        '<button class="btn-log-cancel" onclick="closeLogImport()">Abbrechen</button>' +
+        '<button class="btn-log-parse" onclick="doParseLog()">🔍 Analysieren</button>' +
+        '<button class="btn-log-apply" id="btnLogApply" onclick="doApplyLog()">✓ In Protokoll übernehmen</button>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e) { if (e.target === overlay) closeLogImport(); });
+
+  // Keywords rendern
+  renderKwList('verband');
+  renderKwList('medikament');
+
+  setTimeout(function() {
+    var ta = document.getElementById('logTextarea');
+    if (ta) ta.focus();
+  }, 100);
+}
+
+function closeLogImport() {
+  var el = document.getElementById('logImportOverlay');
+  if (!el) return;
+  el.style.opacity = '0'; el.style.transition = 'opacity .15s';
+  setTimeout(function() { if (el.parentNode) el.parentNode.removeChild(el); }, 160);
+  _logParsed = null;
+}
+
+function doParseLog() {
+  var ta = document.getElementById('logTextarea');
+  if (!ta || !ta.value.trim()) return;
+  _logParsed = parseLogLines(ta.value);
+  renderPreview(_logParsed);
+}
+
+function doApplyLog() {
+  if (!_logParsed) return;
+  applyParsedLog(_logParsed);
+  closeLogImport();
+  // Kurze Bestätigungs-Benachrichtigung
+  var toast = document.createElement('div');
+  toast.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:9999;background:#1A7A5E;color:#fff;font-family:IBM Plex Sans,sans-serif;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:10px 20px;border-radius:3px;box-shadow:0 4px 18px rgba(0,0,0,.5);animation:warnFadeIn .2s ease;';
+  toast.textContent = '✓ Log-Daten erfolgreich übernommen';
+  document.body.appendChild(toast);
+  setTimeout(function() {
+    toast.style.opacity = '0'; toast.style.transition = 'opacity .3s';
+    setTimeout(function() { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 320);
+  }, 2600);
+}
+
+// ── Keyword-Verwaltung UI ──
+function renderKwList(cat) {
+  var list = document.getElementById('kwList-' + cat);
+  if (!list) return;
+  list.innerHTML = '';
+  LOG_CONFIG[cat].forEach(function(kw, idx) {
+    var tag = document.createElement('span');
+    tag.className = 'log-kw-tag';
+    tag.innerHTML = escHtml(kw) + '<button class="log-kw-tag-del" title="Entfernen" onclick="removeKw(\'' + cat + '\',' + idx + ')">✕</button>';
+    list.appendChild(tag);
+  });
+}
+
+function addKw(cat) {
+  var inp = document.getElementById('kwInput-' + cat);
+  if (!inp) return;
+  var val = inp.value.trim();
+  if (!val) return;
+  if (LOG_CONFIG[cat].indexOf(val) === -1) {
+    LOG_CONFIG[cat].push(val);
+    renderKwList(cat);
+  }
+  inp.value = '';
+  inp.focus();
+}
+
+function removeKw(cat, idx) {
+  LOG_CONFIG[cat].splice(idx, 1);
+  renderKwList(cat);
+}
+
+function switchKwTab(cat) {
+  ['verband','medikament'].forEach(function(c) {
+    var tab = document.getElementById('kwTab-' + c);
+    var panel = document.getElementById('kwPanel-' + c);
+    if (tab) tab.classList.toggle('active', c === cat);
+    if (panel) panel.classList.toggle('active', c === cat);
+  });
+  _logKwPanelActive = cat;
+}
+
 // ── postMessage bridge (nur 1 Listener) ──
 window.addEventListener('message', function(e) {
   var d = e.data;
   if (!d || d.target !== 'protokol') return;
   if (d.fn === 'toggleTheme') toggleTheme();
   if (d.fn === 'doPrint')     doPrint();
+  if (d.fn === 'openLogImport') openLogImport();
   if (d.fn === 'getData') {
     // Alle relevanten Felder sammeln und zurücksenden
     function val(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
