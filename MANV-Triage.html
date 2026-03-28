@@ -690,6 +690,7 @@ async function doConnect(){
       if(!d || Object.keys(d).length === 0){
         fetch(FB + '/manv/patients.json?_='+Date.now(), {method:'DELETE', keepalive:true});
         fetch(FB + '/manv/editing.json?_='+Date.now(),  {method:'DELETE', keepalive:true});
+        fetch(FB + '/manv/chat.json?_='+Date.now(),     {method:'DELETE', keepalive:true});
       }
     } catch(e){}
   }
@@ -720,7 +721,8 @@ async function goOffline(silent=false){
     if(remaining === 0){
       await Promise.all([
         fetch(FB + '/manv/patients.json?_=' + Date.now(), {method:'DELETE', keepalive:true}),
-        fetch(FB + '/manv/editing.json?_=' + Date.now(),  {method:'DELETE', keepalive:true})
+        fetch(FB + '/manv/editing.json?_=' + Date.now(),  {method:'DELETE', keepalive:true}),
+        fetch(FB + '/manv/chat.json?_=' + Date.now(),     {method:'DELETE', keepalive:true})
       ]);
     }
   } catch(e){}
@@ -770,7 +772,8 @@ async function pollAll(){
     if(userCount === 0){
       await Promise.all([
         fbDel('/manv/patients'),
-        fbDel('/manv/editing')
+        fbDel('/manv/editing'),
+        fbDel('/manv/chat')
       ]).catch(()=>{});
       patients = []; patN = 0; editingLocks = {};
       render(); updateLockBadges();
@@ -1552,23 +1555,29 @@ function requestNotifPermission(){
 /* ═══════════════════════════════════════════════════════════
    EINSATZ-CHAT
    ═══════════════════════════════════════════════════════════ */
-let chatUser     = null; // { name, role }
-let chatOpen     = false;
+let chatUser      = null;   // { name, role, id }
+let chatOpen      = false;
 let chatPollTimer = null;
-let chatLastTs   = 0;
+let chatMsgsCache = [];     // lokaler Cache aller Nachrichten
 
 function chatInit(){
   const overlay = document.getElementById('chat-overlay');
   if(!overlay) return;
-  overlay.style.display = chatOpen ? 'flex' : 'none';
+  overlay.style.display = 'none';
 }
 
 window.chatToggle = () => {
   if(!isOnline){ toast('Chat nur im Online-Modus verfügbar', 'err'); return; }
   if(!chatUser){ chatShowLogin(); return; }
   chatOpen = !chatOpen;
-  document.getElementById('chat-overlay').style.display = chatOpen ? 'flex' : 'none';
-  if(chatOpen){ chatLoad(); document.getElementById('chat-input').focus(); }
+  const overlay = document.getElementById('chat-overlay');
+  overlay.style.display = chatOpen ? 'flex' : 'none';
+  if(chatOpen){
+    // Sofort Cache anzeigen, dann frisch laden
+    if(chatMsgsCache.length) renderChat(chatMsgsCache);
+    chatLoad();
+    setTimeout(() => document.getElementById('chat-input')?.focus(), 50);
+  }
 };
 
 function chatShowLogin(){
@@ -1590,13 +1599,12 @@ function chatShowLogin(){
       <select id="chat-login-role" style="border:1px solid var(--bd);background:var(--sf2);padding:8px 10px;font-family:var(--sans);font-size:12px;color:var(--white);outline:none;border-radius:2px;appearance:none;cursor:pointer;"
         onfocus="this.style.borderColor='var(--grn)'" onblur="this.style.borderColor='var(--bd)'">
         <option value="">— Funktion wählen —</option>
-        <option>Leitender Notarzt (LNA)</option>
-        <option>Organisatorischer Leiter RD (OrgL)</option>
+        <option>Einsatzleiter (EL)</option>
+        <option>Abschnittsleiter (AL)</option>
         <option>Notarzt (NA)</option>
-        <option>Notfallsanitäter (NFS)</option>
+        <option>Rettungsassistent (RA)</option>
         <option>Rettungssanitäter (RS)</option>
-        <option>Krankenhausmitarbeiter (KHM)</option>
-        <option>Leitstelle / Disponent</option>
+        <option>Ersthelfer</option>
         <option>Sonstiges</option>
       </select>
     </div>
@@ -1606,20 +1614,20 @@ function chatShowLogin(){
     </div>
   </div>`;
   document.body.appendChild(overlay);
-  setTimeout(()=>document.getElementById('chat-login-name')?.focus(), 100);
+  setTimeout(() => document.getElementById('chat-login-name')?.focus(), 100);
 }
 
 function chatDoLogin(){
   const name = document.getElementById('chat-login-name')?.value.trim();
   const role = document.getElementById('chat-login-role')?.value;
-  if(!name){ toast('Name eingeben!','err'); return; }
-  if(!role){ toast('Funktion wählen!','err'); return; }
+  if(!name){ toast('Name eingeben!', 'err'); return; }
+  if(!role){ toast('Funktion wählen!', 'err'); return; }
   chatUser = {name, role, id: MY_ID};
   document.getElementById('chat-login-overlay')?.remove();
   chatOpen = true;
   document.getElementById('chat-overlay').style.display = 'flex';
   chatLoad();
-  document.getElementById('chat-input')?.focus();
+  setTimeout(() => document.getElementById('chat-input')?.focus(), 50);
   startChatPoll();
 }
 
@@ -1628,50 +1636,80 @@ async function chatSend(){
   const msg = inp?.value.trim();
   if(!msg || !chatUser || !isOnline) return;
   inp.value = '';
-  const entry = {id: uid(), user: chatUser.name, role: chatUser.role, msg, ts: Date.now(), time: stamp()};
-  try { await fbPut('/manv/chat/' + entry.id, entry); } catch(e){ toast('Chat-Fehler','err'); }
+  const entry = {
+    id:   uid(),
+    myId: MY_ID,           // eindeutige Tab-ID für isMe-Erkennung
+    user: chatUser.name,
+    role: chatUser.role,
+    msg,
+    ts:   Date.now(),
+    time: stamp()
+  };
+  // Optimistic: sofort lokal anzeigen
+  chatMsgsCache = [...chatMsgsCache, entry].sort((a,b) => a.ts - b.ts);
+  if(chatOpen) renderChat(chatMsgsCache);
+  try {
+    await fbPut('/manv/chat/' + entry.id, entry);
+  } catch(e){
+    toast('Nachricht konnte nicht gesendet werden', 'err');
+  }
 }
 
 async function chatLoad(){
   if(!isOnline) return;
   try {
     const data = await fbGet('/manv/chat');
-    const msgs = data ? Object.values(data).sort((a,b)=>a.ts-b.ts) : [];
-    renderChat(msgs);
+    const msgs = data ? Object.values(data).sort((a,b) => a.ts - b.ts) : [];
+    chatMsgsCache = msgs;
+    if(chatOpen) renderChat(msgs);
   } catch(e){}
 }
 
 function renderChat(msgs){
   const box = document.getElementById('chat-messages');
   if(!box) return;
-  const wasBottom = box.scrollHeight - box.scrollTop < box.clientHeight + 60;
+  // Scroll-Position merken: war der User am Ende?
+  const wasBottom = box.scrollHeight - box.scrollTop <= box.clientHeight + 60;
+  const lastMsg = msgs[msgs.length - 1];
+  const lastIsMe = lastMsg?.myId === MY_ID;
+
   box.innerHTML = '';
   msgs.forEach(m => {
-    const isMe = m.user === chatUser?.name;
+    // Erkennung: eigene Nachrichten per MY_ID (gespeichert in myId-Feld)
+    // Fallback für alte Nachrichten ohne myId: per Name
+    const isMe = m.myId ? m.myId === MY_ID : m.user === chatUser?.name;
     const div = document.createElement('div');
-    div.style.cssText = `display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'};gap:2px;margin-bottom:8px;`;
-    div.innerHTML = `
-      <div style="font-family:var(--mono);font-size:8px;letter-spacing:1px;color:var(--dim);text-transform:uppercase;">
-        ${isMe?'':m.user+' · '}${m.role}${isMe?' · Du':''}${' · '+m.time}
-      </div>
-      <div style="max-width:80%;padding:8px 12px;border-radius:${isMe?'10px 10px 2px 10px':'10px 10px 10px 2px'};background:${isMe?'rgba(82,183,136,.15)':'var(--sf2)'};border:1px solid ${isMe?'rgba(82,183,136,.3)':'var(--bd)'};font-size:13px;color:var(--txt);line-height:1.45;word-break:break-word;">
-        ${esc(m.msg)}
-      </div>`;
+    div.style.cssText = `display:flex;flex-direction:column;align-items:${isMe ? 'flex-end' : 'flex-start'};gap:2px;margin-bottom:8px;`;
+    div.innerHTML =
+      `<div style="font-family:var(--mono);font-size:8px;letter-spacing:1px;color:var(--dim);text-transform:uppercase;">`+
+        `${isMe ? '' : esc(m.user) + ' · '}${esc(m.role)}${isMe ? ' · Du' : ''} · ${m.time}`+
+      `</div>`+
+      `<div style="max-width:80%;padding:8px 12px;`+
+        `border-radius:${isMe ? '10px 10px 2px 10px' : '10px 10px 10px 2px'};`+
+        `background:${isMe ? 'rgba(82,183,136,.15)' : 'var(--sf2)'};`+
+        `border:1px solid ${isMe ? 'rgba(82,183,136,.3)' : 'var(--bd)'};`+
+        `font-size:13px;color:var(--txt);line-height:1.45;word-break:break-word;">`+
+        esc(m.msg)+
+      `</div>`;
     box.appendChild(div);
   });
-  if(wasBottom || msgs[msgs.length-1]?.user === chatUser?.name) box.scrollTop = box.scrollHeight;
+
+  // Scroll ans Ende wenn: User war schon am Ende, ODER letzte Nachricht ist von uns
+  if(wasBottom || lastIsMe) box.scrollTop = box.scrollHeight;
 }
 
 function startChatPoll(){
   stopChatPoll();
   const loop = async () => {
-    if(!isOnline || !chatOpen) return;
+    if(!isOnline || !chatUser) return; // Poll läuft unabhängig davon ob Chat offen ist
     await chatLoad();
     chatPollTimer = setTimeout(loop, 1500);
   };
-  chatPollTimer = setTimeout(loop, 1500);
+  chatPollTimer = setTimeout(loop, 800); // erster Poll schnell
 }
-function stopChatPoll(){ if(chatPollTimer){ clearTimeout(chatPollTimer); chatPollTimer=null; } }
+function stopChatPoll(){
+  if(chatPollTimer){ clearTimeout(chatPollTimer); chatPollTimer = null; }
+}
 
 /* ═══════════════════════════════════════════════════════════
    HELL/DUNKEL MODUS
