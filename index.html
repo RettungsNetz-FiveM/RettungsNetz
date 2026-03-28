@@ -303,6 +303,94 @@ header {
 <div class="corner-deco br"></div>
 
 <!-- ════════════════════════════════════════
+     MANV SERVER-AUSWAHL MODAL
+════════════════════════════════════════ -->
+<div id="manv-server-overlay" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(8,11,16,.85);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
+  <div id="manv-server-modal" style="width:720px;max-width:96vw;background:var(--sf);border:1px solid var(--bd);border-top:3px solid var(--grn);border-radius:4px;box-shadow:0 24px 64px rgba(0,0,0,.7);display:flex;flex-direction:column;max-height:200vh;">
+    <!-- Modal Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--bd);">
+      <div>
+        <div style="font-family:var(--mono);font-size:11px;letter-spacing:3px;color:var(--grn);text-transform:uppercase;margin-bottom:4px;">MANV · Online-Modus</div>
+        <div style="font-family:var(--cond);font-size:20px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--white);">Server auswählen</div>
+      </div>
+      <button onclick="manvCloseServerSelect()" style="background:none;border:1px solid var(--bd);color:var(--dim);width:30px;height:30px;border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .15s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--bd)';this.style.color='var(--dim)'">✕</button>
+    </div>
+    <!-- Info text -->
+    <div style="padding:12px 20px;background:rgba(72,149,239,.06);border-bottom:1px solid rgba(72,149,239,.15);font-family:var(--mono);font-size:12px;letter-spacing:1px;color:var(--txt2);line-height:1.6;">
+      <span style="color:var(--blu);">ℹ</span>&nbsp; Wähle den Online-Server deines Servers aus.
+    </div>
+    <!-- Server List -->
+    <div id="manv-server-list" style="overflow-y:auto;flex:1;padding:12px;display:flex;flex-direction:column;gap:8px;">
+      <!-- Dynamisch befüllt via JS -->
+    </div>
+    <!-- Footer -->
+    <div style="padding:14px 20px;border-top:1px solid var(--bd);display:flex;align-items:center;justify-content:flex-end;gap:8px;">
+      <button class="hbtn" onclick="manvCloseServerSelect()">Abbrechen</button>
+      <button class="hbtn grn" id="manv-srv-connect-btn" onclick="manvConnectToSelected()" disabled style="opacity:.4">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13"><polyline points="20 6 9 17 4 12"/></svg>
+        Server auswählen
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+/* ── Server Selection Modal Cards ── */
+.msrv-card {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px; background: var(--sf2);
+  border: 1px solid var(--bd); border-radius: 3px;
+  cursor: pointer; transition: all .15s;
+}
+.msrv-card:hover { border-color: var(--bd2); background: var(--sf3); }
+.msrv-card.selected {
+  border-color: var(--grn);
+  background: rgba(82,183,136,.06);
+  box-shadow: 0 0 0 1px rgba(82,183,136,.2);
+}
+.msrv-icon-wrap {
+  width: 48px; height: 48px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--sf); border: 1px solid var(--bd); border-radius: 3px; overflow: hidden;
+}
+.msrv-icon { width: 100%; height: 100%; object-fit: cover; }
+.msrv-icon-fallback {
+  width: 100%; height: 100%; display: flex;
+  align-items: center; justify-content: center;
+  font-size: 22px;
+}
+.msrv-info { flex: 1; min-width: 0; }
+.msrv-name {
+  font-family: var(--cond); font-size: 16px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase; color: var(--white);
+  margin-bottom: 3px;
+}
+.msrv-card.selected .msrv-name { color: var(--grn); }
+.msrv-desc {
+  font-family: var(--sans); font-size: 13px; font-weight: 300;
+  color: var(--txt2); line-height: 1.4;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.msrv-users {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 1px; flex-shrink: 0; min-width: 40px;
+}
+.msrv-users-num {
+  font-family: var(--mono); font-size: 18px; color: var(--grn); font-weight: 700;
+  line-height: 1;
+}
+.msrv-users-lbl {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 1px;
+  color: var(--dim); text-transform: uppercase;
+}
+.msrv-arrow { color: var(--dim); flex-shrink: 0; }
+.msrv-card.selected .msrv-arrow { color: var(--grn); }
+/* Connect button active state */
+#manv-srv-connect-btn:not([disabled]) { opacity: 1 !important; }
+</style>
+
+
+<!-- ════════════════════════════════════════
      UNIFIED HEADER
 ════════════════════════════════════════ -->
 <header>
@@ -346,10 +434,15 @@ header {
     <!-- ── MANV toolbar ── -->
     <div class="toolbar-panel" id="tb-manv">
       <div class="tb-sep"></div>
-      <!-- Online-Mode Toggle -->
-      <button class="hbtn" id="manv-mode-btn" onclick="manvToggleMode()">
-        <span id="manv-mode-dot" style="width:7px;height:7px;border-radius:50%;background:var(--dim);flex-shrink:0;display:inline-block;"></span>
-        <span id="manv-mode-lbl">Lokaler Modus</span>
+      <!-- Online-Mode: JOIN button (shown in offline mode) -->
+      <button class="hbtn grn" id="manv-join-btn" onclick="manvOpenServerSelect()" title="Server auswählen und Online-Modus starten">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><circle cx="12" cy="12" r="3"/><path d="M2 12C2 12 5.5 5 12 5s10 7 10 7-3.5 7-10 7S2 12 2 12z"/><path d="M20 4L4 20" stroke="var(--grn)" stroke-width="0" /><path d="M4.93 4.93a10 10 0 0 1 14.14 14.14" stroke-width="0"/></svg>
+        Online beitreten
+      </button>
+      <!-- Online-Mode: LEAVE button (shown in online mode) -->
+      <button class="hbtn danger" id="manv-leave-btn" style="display:none;" onclick="manvLeaveOnline()" title="Online-Modus verlassen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Online verlassen
       </button>
       <!-- Participant Stats -->
       <div id="manv-stats-pill" style="display:flex;align-items:center;gap:8px;padding:0 10px;height:30px;border:1px solid var(--bd);border-radius:3px;background:var(--sf2);">
@@ -1307,6 +1400,17 @@ function manvSend(fn, arg) {
     f.contentWindow.postMessage({ target: 'manv', fn, arg }, '*');
   }
 }
+let _manvDark = true;
+function manvToggleTheme() {
+  _manvDark = !_manvDark;
+  const lbl = document.getElementById('manv-theme-label');
+  const ic  = document.getElementById('manv-theme-icon');
+  if(lbl) lbl.textContent = _manvDark ? 'Hell' : 'Dunkel';
+  if(ic) ic.innerHTML = _manvDark
+    ? '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>'
+    : '<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>';
+  manvSend('toggleTheme');
+}
 function manvImportClick() {
   document.getElementById('idx-manvImportFile').click();
 }
@@ -1323,40 +1427,157 @@ function manvImportFile(input) {
   input.value = '';
 }
 
-// ── MANV Online-Mode Toggle ──
-function manvToggleMode() {
-  manvSend('toggleMode');
+// ══════════════════════════════════════════════════════
+// MANV SERVER-AUSWAHL & ONLINE-MODE
+// ══════════════════════════════════════════════════════
+
+// ── SERVER DEFINITION ──────────────────────────────────
+// Hier können neue Server einfach hinzugefügt werden:
+const MANV_SERVERS = [
+  {
+    id: 'general',
+    name: 'Genereller Server',
+    description: 'Allgemeiner Online-Server ohne zugehörigen Game-Server. Für alle frei zugänglich.',
+    icon: 'https://rettungsnetz.github.io/Dashboard/RettungsNetz-Preview.png',
+    iconFallback: '🌐',
+    firebaseUrl: 'https://rettungsnetz-default-rtdb.europe-west1.firebasedatabase.app'
+  },
+  {
+    id: 'schrietz',
+    name: 'Feuerwehr Simulation: Schrietz',
+    description: 'Patientenverwaltung für strukturierte Transporte auf Roblox.',
+    icon: 'https://tr.rbxcdn.com/180DAY-2db39f94d36fb78353f65be6eaa9a181/256/256/Image/Webp/noFilter',
+    iconFallback: '🟥',
+    firebaseUrl: 'https://feuerwehr-simulation-schrietz-default-rtdb.europe-west1.firebasedatabase.app'
+  },
+  {
+    id: 'freistaat',
+    name: 'Freistaat Netzwerk',
+    description: 'MANV-Triage-Server für koordinierte Großeinsätze auf FiveM.',
+    icon: 'https://frontend.cfx-services.net/api/servers/icon/bodqmp/559060416.png',
+    iconFallback: '🟨',
+    firebaseUrl: 'https://freistaat-netzwerk-drb-default-rtdb.europe-west1.firebasedatabase.app'
+  }
+];
+// ── ENDE SERVER DEFINITION ─────────────────────────────
+
+let _manvSelectedServer = null;
+let _serverUserCounts   = {};
+
+function manvOpenServerSelect() {
+  document.getElementById('manv-server-overlay').style.display = 'flex';
+  _refreshServerModal();
 }
+function manvCloseServerSelect() {
+  document.getElementById('manv-server-overlay').style.display = 'none';
+}
+
+async function _fetchUserCount(server) {
+  try {
+    const r = await fetch(server.firebaseUrl + '/manv/presence.json?_=' + Date.now(), {cache:'no-store'});
+    if (!r.ok) return null;
+    const d = await r.json();
+    return d ? Object.keys(d).length : 0;
+  } catch(e) { return null; }
+}
+
+async function _refreshServerModal() {
+  const list = document.getElementById('manv-server-list');
+  list.innerHTML = '';
+
+  // Build cards with loading state, then update counts
+  MANV_SERVERS.forEach(srv => {
+    const card = document.createElement('div');
+    card.className = 'msrv-card';
+    card.id = 'msrv-card-' + srv.id;
+    card.onclick = () => _manvSelectServer(srv.id);
+
+    const iconHtml = srv.icon
+      ? `<img src="${srv.icon}" class="msrv-icon" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+        + `<div class="msrv-icon-fallback" style="display:none">${srv.iconFallback}</div>`
+      : `<div class="msrv-icon-fallback">${srv.iconFallback}</div>`;
+
+    card.innerHTML = `
+      <div class="msrv-icon-wrap">${iconHtml}</div>
+      <div class="msrv-info">
+        <div class="msrv-name">${srv.name}</div>
+        <div class="msrv-desc">${srv.description}</div>
+      </div>
+      <div class="msrv-users">
+        <span class="msrv-users-num" id="msrv-cnt-${srv.id}">…</span>
+        <span class="msrv-users-lbl">Online</span>
+      </div>
+      <div class="msrv-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>`;
+    list.appendChild(card);
+  });
+
+  // Load user counts in parallel
+  const counts = await Promise.all(MANV_SERVERS.map(srv => _fetchUserCount(srv)));
+  MANV_SERVERS.forEach((srv, i) => {
+    const el = document.getElementById('msrv-cnt-' + srv.id);
+    if (el) el.textContent = counts[i] !== null ? counts[i] : '?';
+    _serverUserCounts[srv.id] = counts[i];
+  });
+}
+
+function _manvSelectServer(serverId) {
+  const srv = MANV_SERVERS.find(s => s.id === serverId);
+  if (!srv) return;
+  _manvSelectedServer = srv;
+
+  // Highlight selected
+  document.querySelectorAll('.msrv-card').forEach(c => c.classList.remove('selected'));
+  const card = document.getElementById('msrv-card-' + serverId);
+  if (card) card.classList.add('selected');
+
+  // Enable connect button
+  const btn = document.getElementById('manv-srv-connect-btn');
+  btn.disabled = false;
+  btn.textContent = '🔥 Mit "' + srv.name + '" verbinden';
+}
+
+function manvConnectToSelected() {
+  if (!_manvSelectedServer) return;
+  manvCloseServerSelect();
+  // Send selected Firebase URL to the iframe
+  manvSend('setFirebaseUrl', _manvSelectedServer.firebaseUrl);
+  // Give the iframe a moment to set the URL, then trigger connect
+  setTimeout(() => manvSend('toggleMode'), 150);
+}
+
+function manvLeaveOnline() {
+  if (!confirm('Online-Modus verlassen?\nDaten bleiben in Firebase gespeichert.')) return;
+  manvSend('leaveOnline');
+}
+
 function manvUpdateModeUI(online, users) {
-  const btn  = document.getElementById('manv-mode-btn');
-  const dot  = document.getElementById('manv-mode-dot');
-  const lbl  = document.getElementById('manv-mode-lbl');
-  const cnt  = document.getElementById('manv-user-count');
-  const pill = document.getElementById('manv-stats-pill');
-  const clr  = document.getElementById('manv-clear-btn');
+  const joinBtn  = document.getElementById('manv-join-btn');
+  const leaveBtn = document.getElementById('manv-leave-btn');
+  const cnt      = document.getElementById('manv-user-count');
+  const pill     = document.getElementById('manv-stats-pill');
+  const clr      = document.getElementById('manv-clear-btn');
+
   if (online) {
-    dot.style.background = '#52b788';
-    dot.style.boxShadow  = '0 0 5px rgba(82,183,136,.7)';
-    lbl.textContent = '🔥 Online — Aktiv';
-    btn.style.cssText = 'font-family:var(--mono);font-size:10px;letter-spacing:1px;padding:0 11px;height:30px;border:1px solid #52b788;background:#0d2a1a;color:#52b788;cursor:pointer;border-radius:3px;text-transform:uppercase;transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:5px;flex-shrink:0;';
+    joinBtn.style.display  = 'none';
+    leaveBtn.style.display = 'flex';
     pill.style.borderColor = 'rgba(82,183,136,.3)';
-    cnt.style.color = '#52b788';
-    cnt.textContent = users !== undefined ? users : '—';
-    // Disable "Alle löschen" in online mode
+    cnt.style.color        = '#52b788';
+    cnt.textContent        = users !== undefined ? users : '—';
     if (clr) { clr.disabled = true; clr.style.opacity = '.3'; clr.title = 'Im Online-Modus deaktiviert'; }
   } else {
-    dot.style.background = 'var(--dim)';
-    dot.style.boxShadow  = 'none';
-    lbl.textContent = 'Lokaler Modus';
-    btn.style.cssText = '';
+    joinBtn.style.display  = 'flex';
+    leaveBtn.style.display = 'none';
     pill.style.borderColor = 'var(--bd)';
-    cnt.style.color = 'var(--txt)';
-    cnt.textContent = '—';
+    cnt.style.color        = 'var(--txt)';
+    cnt.textContent        = '—';
     if (clr) { clr.disabled = false; clr.style.opacity = '1'; clr.title = ''; }
   }
 }
 
 // ── Blaulicht: flash once then move ──
+
 (function() {
   const bl = document.getElementById('blaulicht');
   const dots = Array.from(document.querySelectorAll('.bl-dot'));

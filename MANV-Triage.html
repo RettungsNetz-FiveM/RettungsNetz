@@ -102,7 +102,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:var(--sa
 .cbtn.ab{border-color:rgba(244,162,97,.3);color:var(--amb);}    .cbtn.ab:hover{background:rgba(244,162,97,.1);}
 
 /* ══ TOAST ══ */
-.toast{position:fixed;bottom:24px;right:24px;background:var(--sf2);border:1px solid var(--bd2);padding:12px 20px;border-radius:6px;z-index:9000;font-family:var(--mono);font-size:13px;font-weight:500;letter-spacing:.03em;color:var(--txt);transform:translateY(20px);opacity:0;transition:all .3s;pointer-events:none;box-shadow:0 4px 24px rgba(0,0,0,.5);}
+.toast{position:fixed;top:16px;right:24px;background:var(--sf2);border:1px solid var(--bd2);padding:12px 20px;border-radius:6px;z-index:9000;font-family:var(--mono);font-size:13px;font-weight:500;letter-spacing:.03em;color:var(--txt);transform:translateY(-12px);opacity:0;transition:all .3s;pointer-events:none;box-shadow:0 4px 24px rgba(0,0,0,.5);}
 .toast.show{transform:translateY(0);opacity:1;}
 .toast.ok  {border-color:var(--grn);color:var(--grn);background:rgba(82,183,136,.08);}
 .toast.err {border-color:var(--red);color:var(--red);background:rgba(230,57,70,.08);}
@@ -222,6 +222,42 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:var(--sa
 .mbtn.pri{background:var(--rot);border-color:var(--rot);color:#fff;} .mbtn.pri:hover{background:var(--rot-d);}
 .mbtn.grn{background:#1a3a2a;border-color:var(--grn);color:var(--grn);} .mbtn.grn:hover{background:#224433;}
 @media print{.sidebar{display:none!important;}.grid-view{display:block;}.pat-card{break-inside:avoid;margin-bottom:10px;}}
+
+/* ══ BODYMAP POPUP ══ */
+.bm-popup-overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:8000;display:flex;align-items:center;justify-content:center;animation:bmFadeIn .15s ease;}
+@keyframes bmFadeIn{from{opacity:0}to{opacity:1}}
+.bm-popup{background:var(--m-bg);border:2px solid #C0392B;border-radius:6px;padding:26px 28px 22px;min-width:420px;max-width:520px;width:95%;box-shadow:0 0 40px rgba(192,57,43,.35),0 12px 36px rgba(0,0,0,.65);animation:bmPop .2s cubic-bezier(.34,1.56,.64,1);display:flex;flex-direction:column;gap:14px;}
+@keyframes bmPop{from{transform:scale(.88);opacity:0}to{transform:scale(1);opacity:1}}
+.bm-popup-title{font-family:'IBM Plex Sans',sans-serif;font-size:16px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#C0392B;border-bottom:1px solid var(--m-g6);padding-bottom:12px;}
+.bm-popup-sub{font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--m-g4);margin-bottom:2px;}
+.bm-popup-checks{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;}
+.bm-popup-ci{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;font-weight:500;color:var(--m-g1);user-select:none;padding:8px 10px;border-radius:4px;border:1px solid transparent;transition:background .1s,border-color .1s;}
+.bm-popup-ci:hover{background:var(--m-g7);border-color:var(--m-g6);}
+.bm-popup-ci input[type=checkbox]{width:18px;height:18px;accent-color:#C0392B;cursor:pointer;margin:0;flex-shrink:0;}
+.bm-popup-ci.checked{color:#C0392B;font-weight:700;background:rgba(192,57,43,.07);border-color:rgba(192,57,43,.3);}
+.bm-popup-btns{display:flex;gap:10px;justify-content:flex-end;padding-top:8px;border-top:1px solid var(--m-g6);}
+.bm-btn-ok{background:#C0392B;color:#fff;border:none;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:10px 28px;border-radius:3px;transition:background .15s;}
+.bm-btn-ok:hover{background:#922B21;}
+.bm-btn-cancel{background:transparent;color:var(--m-g4);border:1px solid var(--m-g4);cursor:pointer;font-family:'IBM Plex Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:8px 18px;border-radius:3px;}
+.bm-zone-g{cursor:pointer;}
+
+/* ══ CHAT PANEL ══ */
+#chat-overlay{position:fixed;bottom:0;right:0;width:340px;height:460px;z-index:7000;display:none;flex-direction:column;background:var(--sf);border:1px solid var(--bd);border-bottom:none;border-radius:8px 8px 0 0;box-shadow:0 -4px 32px rgba(0,0,0,.5);}
+.chat-header{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--bd);background:var(--sf2);border-radius:8px 8px 0 0;flex-shrink:0;}
+.chat-title{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--grn);flex:1;}
+.chat-close{background:none;border:none;color:var(--dim);cursor:pointer;font-size:14px;padding:0 4px;transition:color .12s;}
+.chat-close:hover{color:var(--txt);}
+#chat-messages{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;}
+.chat-footer{display:flex;gap:6px;padding:10px 12px;border-top:1px solid var(--bd);flex-shrink:0;}
+#chat-input{flex:1;border:1px solid var(--bd);background:var(--sf2);padding:7px 10px;font-family:var(--sans);font-size:12px;color:var(--txt);outline:none;border-radius:3px;transition:border-color .15s;}
+#chat-input:focus{border-color:var(--grn);}
+.chat-send{background:var(--grn);color:#fff;border:none;cursor:pointer;font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:0 12px;border-radius:3px;font-weight:700;transition:opacity .15s;}
+.chat-send:hover{opacity:.85;}
+
+/* ══ ALERT SNOOZE BTN ══ */
+#alert-snooze-btn{font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;border:1px solid var(--bd);background:var(--sf2);color:var(--txt2);padding:0 10px;height:26px;cursor:pointer;border-radius:3px;white-space:nowrap;transition:all .15s;}
+#alert-snooze-btn:hover{border-color:var(--amb);color:var(--amb);}
+
 </style>
 </head>
 <body>
@@ -284,10 +320,6 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:var(--sa
         <div class="modal-status"><div class="mdot"></div><div class="mdot-lbl">Aktiv</div></div>
         <div class="modal-sp"></div>
         <div class="modal-tr">
-          <button class="mbtn-top" id="done-btn" onclick="toggleDone()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11"><polyline points="20 6 9 17 4 12"/></svg>
-            <span id="done-lbl">Nicht abtransportiert</span>
-          </button>
           <button class="mbtn-top" id="exp-btn" onclick="exportSingle()" style="display:none;background:#1a3a2a;border-color:#52b788;color:#52b788;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Export
@@ -374,6 +406,67 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:var(--sa
           <div class="f"><label>Befundbeschreibung / Anamnese</label><textarea id="f-befund" placeholder="Kurze Beschreibung …" autocomplete="off"></textarea></div>
         </div>
       </div>
+      <!-- 04b BODYMAP -->
+      <div class="ms" style="border-left-color:#B8470B;">
+        <div class="ms-head"><span class="ms-num" style="color:#B8470B;">04b</span><span class="ms-title">Bodymap — Verletzungslokalisation</span></div>
+        <div class="ms-body">
+          <div style="display:flex;gap:14px;align-items:flex-start;">
+            <!-- SVG Body -->
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;">
+              <div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--m-g4);">Zone anklicken</div>
+              <svg id="bm-svg" width="110" height="240" viewBox="0 0 130 280" style="display:block;overflow:visible;cursor:pointer;">
+                <g id="bmg-Kopf" class="bm-zone-g" onclick="bmZoneClick('Kopf')">
+                  <ellipse id="bms-Kopf-0" cx="65" cy="22" rx="20" ry="21" fill="#282828" stroke="#555" stroke-width="1.5"/>
+                  <circle cx="57" cy="19" r="2" fill="#555" opacity=".5" pointer-events="none"/>
+                  <circle cx="73" cy="19" r="2" fill="#555" opacity=".5" pointer-events="none"/>
+                  <path d="M57 27 Q65 32 73 27" stroke="#555" stroke-width="1" opacity=".45" fill="none" pointer-events="none"/>
+                  <text id="bmt-Kopf" x="65" y="22" text-anchor="middle" dominant-baseline="middle" font-family="IBM Plex Mono,monospace" font-size="8" font-weight="700" fill="#777" pointer-events="none"> </text>
+                </g>
+                <rect x="59" y="43" width="12" height="9" rx="2" fill="#282828" stroke="#555" stroke-width="1" pointer-events="none"/>
+                <g id="bmg-Torso" class="bm-zone-g" onclick="bmZoneClick('Torso')">
+                  <rect id="bms-Torso-0" x="36" y="52" width="58" height="80" rx="6" fill="#282828" stroke="#555" stroke-width="1.5"/>
+                  <line x1="65" y1="54" x2="65" y2="130" stroke="#555" stroke-width=".6" opacity=".2" pointer-events="none"/>
+                  <circle cx="65" cy="108" r="2" fill="#555" opacity=".25" pointer-events="none"/>
+                  <text id="bmt-Torso" x="65" y="90" text-anchor="middle" dominant-baseline="middle" font-family="IBM Plex Mono,monospace" font-size="8" font-weight="700" fill="#777" pointer-events="none"> </text>
+                </g>
+                <rect x="38" y="132" width="54" height="14" rx="3" fill="#282828" stroke="#555" stroke-width="1" pointer-events="none"/>
+                <g id="bmg-LinkerArm" class="bm-zone-g" onclick="bmZoneClick('Linker Arm')">
+                  <rect id="bms-LinkerArm-0" x="13" y="52" width="21" height="40" rx="7" fill="#282828" stroke="#555" stroke-width="1.5"/>
+                  <rect id="bms-LinkerArm-1" x="12" y="94" width="19" height="34" rx="7" fill="#282828" stroke="#555" stroke-width="1.5"/>
+                  <ellipse id="bms-LinkerArm-2" cx="21" cy="136" rx="10" ry="7" fill="#282828" stroke="#555" stroke-width="1.5"/>
+                  <text id="bmt-LinkerArm" x="21" y="90" text-anchor="middle" dominant-baseline="middle" font-family="IBM Plex Mono,monospace" font-size="7" font-weight="700" fill="#777" pointer-events="none"> </text>
+                </g>
+                <g id="bmg-RechterArm" class="bm-zone-g" onclick="bmZoneClick('Rechter Arm')">
+                  <rect id="bms-RechterArm-0" x="96" y="52" width="21" height="40" rx="7" fill="#282828" stroke="#555" stroke-width="1.5"/>
+                  <rect id="bms-RechterArm-1" x="99" y="94" width="19" height="34" rx="7" fill="#282828" stroke="#555" stroke-width="1.5"/>
+                  <ellipse id="bms-RechterArm-2" cx="109" cy="136" rx="10" ry="7" fill="#282828" stroke="#555" stroke-width="1.5"/>
+                  <text id="bmt-RechterArm" x="109" y="90" text-anchor="middle" dominant-baseline="middle" font-family="IBM Plex Mono,monospace" font-size="7" font-weight="700" fill="#777" pointer-events="none"> </text>
+                </g>
+                <g id="bmg-LinkesBein" class="bm-zone-g" onclick="bmZoneClick('Linkes Bein')">
+                  <rect id="bms-LinkesBein-0" x="38" y="147" width="23" height="50" rx="7" fill="#282828" stroke="#555" stroke-width="1.5"/>
+                  <rect id="bms-LinkesBein-1" x="39" y="199" width="21" height="46" rx="7" fill="#282828" stroke="#555" stroke-width="1.5"/>
+                  <ellipse id="bms-LinkesBein-2" cx="49" cy="252" rx="14" ry="7" fill="#282828" stroke="#555" stroke-width="1.5"/>
+                  <text id="bmt-LinkesBein" x="49" y="172" text-anchor="middle" dominant-baseline="middle" font-family="IBM Plex Mono,monospace" font-size="7" font-weight="700" fill="#777" pointer-events="none"> </text>
+                </g>
+                <g id="bmg-RechtesBein" class="bm-zone-g" onclick="bmZoneClick('Rechtes Bein')">
+                  <rect id="bms-RechtesBein-0" x="69" y="147" width="23" height="50" rx="7" fill="#282828" stroke="#555" stroke-width="1.5"/>
+                  <rect id="bms-RechtesBein-1" x="70" y="199" width="21" height="46" rx="7" fill="#282828" stroke="#555" stroke-width="1.5"/>
+                  <ellipse id="bms-RechtesBein-2" cx="81" cy="252" rx="14" ry="7" fill="#282828" stroke="#555" stroke-width="1.5"/>
+                  <text id="bmt-RechtesBein" x="81" y="172" text-anchor="middle" dominant-baseline="middle" font-family="IBM Plex Mono,monospace" font-size="7" font-weight="700" fill="#777" pointer-events="none"> </text>
+                </g>
+              </svg>
+              <button onclick="bmClearAll()" style="font-family:var(--mono);font-size:8px;letter-spacing:1px;text-transform:uppercase;border:1px solid var(--m-g6);background:transparent;color:var(--m-g4);cursor:pointer;padding:3px 10px;border-radius:2px;margin-top:4px;transition:all .12s;" onmouseover="this.style.borderColor='#C0392B';this.style.color='#C0392B'" onmouseout="this.style.borderColor='var(--m-g6)';this.style.color='var(--m-g4)'">✕ Zurücksetzen</button>
+            </div>
+            <!-- Legend -->
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;">
+              <div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--m-g4);">Eingetragene Verletzungen</div>
+              <div id="bm-legend-list" style="display:flex;flex-direction:column;gap:4px;min-height:30px;">
+                <div id="bm-empty-hint" style="font-size:9px;color:var(--m-g4);font-style:italic;padding:4px 0;">Zone anklicken um Verletzungen einzutragen</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       <!-- 05 MASSNAHMEN -->
       <div class="ms" style="border-left-color:#C0392B;">
         <div class="ms-head"><span class="ms-num" style="color:#C0392B;">05</span><span class="ms-title">Durchgeführte Maßnahmen</span></div>
@@ -434,9 +527,10 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:var(--sa
         <div class="ms-body">
           <div class="g4">
             <div class="f"><label>Transportmittel</label><select id="f-transport"><option value="">—</option><option>RTW</option><option>NEF/RTW</option><option>ITW</option><option>RTH</option><option>KTW</option><option>NAW</option><option>Polizei</option><option>Eigenanreise</option><option>Vor Ort verblieben</option></select></div>
+            <div class="f"><label>Transportfahrzeug</label><input type="text" id="f-transport-fz" placeholder="z.B. Florian 1-83-1" autocomplete="off"></div>
             <div class="f"><label>Schockraum-Voranmeldung</label><select id="f-schockraum"><option value="">—</option><option>Ja</option><option>Nein</option><option>Nicht erforderlich</option></select></div>
-            <div class="f c2"><label>Transport-Ziel Krankenhaus</label><input type="text" id="f-kh" placeholder="z.B. Klinikum Muster" autocomplete="off"></div>
             <div class="f"><label>Abfahrtszeit</label><div class="tc"><input type="text" id="f-transportzeit" placeholder="HH:MM" autocomplete="off"><button class="btn-now" onclick="setNow('f-transportzeit')">⏱ Zeit</button></div></div>
+            <div class="f c4"><label>Transport-Ziel Krankenhaus</label><input type="text" id="f-kh" placeholder="z.B. Klinikum Muster" autocomplete="off"></div>
           </div>
           <div class="f"><label>Übergabebericht / Bemerkungen</label><textarea id="f-bemerk" placeholder="Übergabebericht …" autocomplete="off"></textarea></div>
         </div>
@@ -444,6 +538,10 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:var(--sa
     </div>
     <div class="modal-foot">
       <button class="mbtn" onclick="closeModal()">Abbrechen</button>
+      <button class="mbtn grn" id="modal-done-btn" onclick="toggleDoneFromFooter()" style="flex:1;justify-content:center;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><polyline points="20 6 9 17 4 12"/></svg>
+        <span id="modal-done-lbl">✓ Abtransportiert</span>
+      </button>
       <button class="mbtn pri" onclick="savePatient()">Speichern</button>
     </div>
   </div>
@@ -461,7 +559,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:var(--sa
    Race-Conditions, keine SSE-Pfad-Probleme
    ═══════════════════════════════════════════════════════════ */
 
-const FB = 'https://rettungsnetz-default-rtdb.europe-west1.firebasedatabase.app';
+let FB = 'https://rettungsnetz-default-rtdb.europe-west1.firebasedatabase.app';
 
 async function fbGet(path){
   // cache:'no-store' verhindert dass der Browser alte Antworten cached
@@ -516,7 +614,7 @@ const CB_MAP = {
   'cb-perfusor':'Perfusor','cb-lucas':'Lucas 3'
 };
 const TXT = ['f-name','f-dob','f-fundort','f-findtime','f-puls','f-rr','f-spo2',
-             'f-hauptv','f-befund','f-massn-extra','f-kh','f-transportzeit','f-bemerk'];
+             'f-hauptv','f-befund','f-massn-extra','f-kh','f-transportzeit','f-bemerk','f-transport-fz'];
 const SEL = ['f-sex','f-atemweg','f-atmung','f-kreislauf','f-gcs','f-mech','f-transport','f-schockraum'];
 const MED_OPTS = '<option value="">—</option><option>Intravenöser Zugang (I.V.)</option><option>Intraossärer Zugang (I.O.)</option><option>Oral (p.o.)</option><option>Inhalativ</option><option>Subkutan (s.c.)</option>';
 
@@ -555,6 +653,7 @@ function notifyParent(users){
    ═══════════════════════════════════════════════════════════ */
 window.handleModeSwitch = () => {
   if(isOnline){
+    // Wenn vom Parent aufgerufen, kein Dialog - aber intern noch mit confirm
     if(!confirm('Online-Modus verlassen?\nDaten bleiben in Firebase gespeichert.'))return;
     goOffline();
   } else {
@@ -574,8 +673,7 @@ async function doConnect(){
   }
 
   isOnline = true;
-
-  // Presence registrieren
+  requestNotifPermission();
   try { await fbPut('/manv/presence/' + MY_ID, {at: Date.now()}); } catch(e){}
 
   // Zuverlässige Cleanup beim Schließen/Reload
@@ -686,8 +784,10 @@ async function pollAll(){
       const valid = Object.values(pData).filter(
         v => v && typeof v === 'object' && typeof v.id === 'string' && typeof v.num === 'number'
       );
+      const prevPatients = [...patients];
       patients = valid.sort((a,b) => a.num - b.num);
       patN = patients.reduce((m,p) => Math.max(m, p.num), 0);
+      checkAlerts(prevPatients);
     }
     render();
 
@@ -827,21 +927,105 @@ function loadMed(rows){
    ═══════════════════════════════════════════════════════════ */
 function setDoneUI(v){
   isDone = !!v;
-  const btn = document.getElementById('done-btn');
-  const lbl = document.getElementById('done-lbl');
+  const btn = document.getElementById('modal-done-btn');
+  const lbl = document.getElementById('modal-done-lbl');
+  if(!btn) return;
   if(isDone){
-    btn.style.cssText = 'background:rgba(82,183,136,.12);border-color:#52b788;color:#52b788;';
-    lbl.textContent = 'Abtransportiert ✓';
+    btn.style.background='rgba(82,183,136,.12)';btn.style.borderColor='#52b788';btn.style.color='#52b788';
+    lbl.textContent = '✓ Abtransportiert';
   } else {
-    btn.style.cssText = '';
-    lbl.textContent = 'Nicht abtransportiert';
+    btn.style.background='';btn.style.borderColor='';btn.style.color='';
+    lbl.textContent = '✓ Abtransportiert';
   }
 }
-window.toggleDone = () => setDoneUI(!isDone);
+function playErrorSound(){
+  try {
+    if(!alertAudioCtx) alertAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if(alertSnoozed) return;
+    const ctx = alertAudioCtx;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.setValueAtTime(220, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(110, ctx.currentTime + 0.25);
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.28);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.28);
+  } catch(e){}
+}
 
-/* ═══════════════════════════════════════════════════════════
-   MODAL
-   ═══════════════════════════════════════════════════════════ */
+function scrollToSec06(){
+  const modalBody = document.querySelector('.modal-body');
+  if(!modalBody) return;
+  // Sektion 06 gezielt über die Nummer-Span finden (nicht per Farbe, da 03 dieselbe Farbe hat)
+  let sec06 = null;
+  modalBody.querySelectorAll('.ms').forEach(ms => {
+    const num = ms.querySelector('.ms-num');
+    if(num && num.textContent.trim() === '06') sec06 = ms;
+  });
+  if(sec06){
+    // Relativen Offset zum scrollbaren Container berechnen
+    const containerTop = modalBody.getBoundingClientRect().top;
+    const elTop = sec06.getBoundingClientRect().top;
+    modalBody.scrollBy({ top: elTop - containerTop - 8, behavior: 'smooth' });
+  }
+}
+
+window.toggleDoneFromFooter = () => {
+  if(!isDone){
+    // Immer zuerst zu 06 scrollen
+    scrollToSec06();
+    const transport = document.getElementById('f-transport')?.value.trim();
+    const fz = document.getElementById('f-transport-fz')?.value.trim();
+    const kh = document.getElementById('f-kh')?.value.trim();
+    const missing = [];
+    if(!transport) missing.push('Transportmittel');
+    if(!fz) missing.push('Transportfahrzeug');
+    if(!kh) missing.push('Transport-Ziel Krankenhaus');
+    if(missing.length){
+      playErrorSound();
+      setTimeout(() => toast('Fehlend: ' + missing.join(', '), 'err'), 350);
+      return;
+    }
+  }
+  setDoneUI(!isDone);
+};
+
+window.quickDone = async (id, e) => {
+  e.stopPropagation();
+  const i = patients.findIndex(p => p.id === id);
+  if(i < 0) return;
+  if(!patients[i].done){
+    const p = patients[i];
+    const missing = [];
+    if(!p['f-transport']) missing.push('Transportmittel');
+    if(!p['f-transport-fz']) missing.push('Transportfahrzeug');
+    if(!p['f-kh']) missing.push('Transport-Ziel Krankenhaus');
+    if(missing.length){
+      // Modal öffnen, dann zu 06 scrollen und Fehler anzeigen
+      window.openEdit(id);
+      setTimeout(() => {
+        scrollToSec06();
+        setTimeout(() => {
+          playErrorSound();
+          toast('Fehlend: ' + missing.join(', '), 'err');
+        }, 400);
+      }, 120);
+      return;
+    }
+  }
+  patients[i].done      = !patients[i].done;
+  patients[i].updatedAt = stamp();
+  toast(patients[i].done ? 'Abtransportiert ✓' : 'Zurückgesetzt', 'ok');
+  await dbSave(patients[i]);
+  if(!isOnline) render();
+};
+function setFloatingToolbar(visible){
+  const tb = document.getElementById('floating-toolbar');
+  if(tb) tb.style.display = visible ? 'flex' : 'none';
+}
+
 window.openNew = () => {
   editId = null; activeCat = null; clearF(); setDoneUI(false);
   document.getElementById('m-title').innerHTML = 'Neuer <span>Patient</span>';
@@ -851,6 +1035,7 @@ window.openNew = () => {
   document.getElementById('lock-warning').classList.remove('show');
   document.getElementById('modal-ov').classList.add('open');
   document.querySelector('.modal-body').scrollTop = 0;
+  setFloatingToolbar(false);
 };
 
 window.openEdit = id => {
@@ -869,6 +1054,7 @@ window.openEdit = id => {
   updateModalLockWarning();
   document.getElementById('modal-ov').classList.add('open');
   acquireEditLock(id);
+  setFloatingToolbar(false);
 };
 
 window.closeModal = () => {
@@ -876,6 +1062,7 @@ window.closeModal = () => {
   document.getElementById('modal-ov').classList.remove('open');
   document.getElementById('lock-warning').classList.remove('show');
   editId = null;
+  setFloatingToolbar(true);
 };
 
 window.ovClick = e => {
@@ -899,6 +1086,7 @@ function clearF(){
   Object.keys(CB_MAP).forEach(id => { const el=document.getElementById(id); if(el) el.checked=false; });
   document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('sel'));
   resetMed();
+  bmZoneData = {}; bmRenderAll();
 }
 function loadF(p){
   TXT.forEach(id => { const el=document.getElementById(id); if(el) el.value=p[id]||''; });
@@ -907,11 +1095,12 @@ function loadF(p){
   document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('sel'));
   if(p.cat){ const cb=document.getElementById('cb-'+p.cat); if(cb) cb.classList.add('sel'); }
   loadMed(p.medRows || []);
+  bmZoneData = p.bmZoneData || {}; bmRenderAll();
 }
 function readF(){
   const gv = id => (document.getElementById(id)?.value.trim() || '');
   const checks = Object.keys(CB_MAP).filter(id => document.getElementById(id)?.checked);
-  const obj = {cat:activeCat, checks, done:isDone, medRows:readMed()};
+  const obj = {cat:activeCat, checks, done:isDone, medRows:readMed(), bmZoneData:{...bmZoneData}};
   TXT.forEach(id => obj[id] = gv(id));
   SEL.forEach(id => obj[id] = gv(id));
   obj.name     = obj['f-name'];
@@ -966,16 +1155,6 @@ window.savePatient = async () => {
   }
 };
 
-window.quickDone = async (id, e) => {
-  e.stopPropagation();
-  const i = patients.findIndex(p => p.id === id);
-  if(i < 0) return;
-  patients[i].done     = !patients[i].done;
-  patients[i].updatedAt = stamp();
-  toast(patients[i].done ? 'Abtransportiert ✓' : 'Zurückgesetzt', 'ok');
-  await dbSave(patients[i]);
-  if(!isOnline) render();
-};
 
 /* ═══════════════════════════════════════════════════════════
    FILTER
@@ -1087,8 +1266,8 @@ function buildCard(p){
       '<div class="pat-tags">'+tags+((p.massnahmen||[]).length>3?'<span class="ptag" style="background:var(--sf3);color:var(--dim)">+'+(p.massnahmen.length-3)+'</span>':'')+'</div>'+
       '<div class="pat-actions">'+
         (p.done
-          ? '<button class="cbtn ab btn-transport"'+lockAttr+' onclick="quickDone(\''+p.id+'\',event)">↺ Aktiv</button>'
-          : '<button class="cbtn gb btn-transport"'+lockAttr+' onclick="quickDone(\''+p.id+'\',event)">✓ Abtr.</button>')+
+          ? '<button class="cbtn ab btn-transport"'+lockAttr+' onclick="quickDone(\''+p.id+'\',event)" style="padding:0 14px;min-width:90px;justify-content:center;">↺ Aktiv setzen</button>'
+          : '<button class="cbtn gb btn-transport"'+lockAttr+' onclick="quickDone(\''+p.id+'\',event)" style="padding:0 14px;min-width:90px;justify-content:center;">✓ Abtransportiert</button>')+
         '<button class="cbtn" onclick="event.stopPropagation();expById(\''+p.id+'\')">↓</button>'+
         '<button class="cbtn btn-delete"'+lockAttr+' onclick="event.stopPropagation();delPat(\''+p.id+'\')" style="color:var(--red)">✕</button>'+
         '<button class="cbtn btn-edit" onclick="openEdit(\''+p.id+'\')"'+editBtnDisabled+'>Bearbeiten</button>'+
@@ -1193,8 +1372,366 @@ function toast(msg, type){
 }
 
 /* ═══════════════════════════════════════════════════════════
-   POSTMESSAGE (von index.html)
+   BODYMAP
    ═══════════════════════════════════════════════════════════ */
+const BM_TYPES = ['Polytrauma','Prellung','Schürfwunde','Fraktur','SHT','Stichverletzung',
+  'Schnittverletzung','Schusswunde','Quetschverletzung','Risswunde',
+  'Verbrennung','Amputation','Avulsion','Augenverletzung','Sonstiges'];
+const BM_ZONES = {
+  'Kopf':        {shapes:['bms-Kopf-0'],        label:'bmt-Kopf'},
+  'Torso':       {shapes:['bms-Torso-0'],        label:'bmt-Torso'},
+  'Linker Arm':  {shapes:['bms-LinkerArm-0','bms-LinkerArm-1','bms-LinkerArm-2'],   label:'bmt-LinkerArm'},
+  'Rechter Arm': {shapes:['bms-RechterArm-0','bms-RechterArm-1','bms-RechterArm-2'],label:'bmt-RechterArm'},
+  'Linkes Bein': {shapes:['bms-LinkesBein-0','bms-LinkesBein-1','bms-LinkesBein-2'], label:'bmt-LinkesBein'},
+  'Rechtes Bein':{shapes:['bms-RechtesBein-0','bms-RechtesBein-1','bms-RechtesBein-2'],label:'bmt-RechtesBein'}
+};
+let bmZoneData = {};
+
+function bmApplyStyle(zone, hasInjury){
+  const cfg = BM_ZONES[zone]; if(!cfg) return;
+  const fill   = hasInjury ? 'rgba(192,57,43,0.32)' : '#282828';
+  const stroke = hasInjury ? '#C0392B' : '#555';
+  const sw     = hasInjury ? '2.5' : '1.5';
+  cfg.shapes.forEach(sid => {
+    const el = document.getElementById(sid); if(!el) return;
+    el.setAttribute('fill',fill); el.setAttribute('stroke',stroke); el.setAttribute('stroke-width',sw);
+  });
+  const lbl = document.getElementById(cfg.label);
+  if(lbl) lbl.setAttribute('fill', hasInjury ? '#C0392B' : '#777');
+}
+function bmRenderAll(){
+  Object.keys(BM_ZONES).forEach(zone => bmApplyStyle(zone, !!(bmZoneData[zone]?.length)));
+  bmRenderLegend();
+}
+function bmRenderLegend(){
+  const list = document.getElementById('bm-legend-list'); if(!list) return;
+  list.innerHTML = '';
+  const zones = Object.keys(bmZoneData).filter(z => bmZoneData[z]?.length);
+  if(!zones.length){
+    list.innerHTML = '<div id="bm-empty-hint" style="font-size:9px;color:var(--m-g4);font-style:italic;padding:4px 0;">Zone anklicken um Verletzungen einzutragen</div>';
+    return;
+  }
+  zones.forEach(zone => {
+    const div = document.createElement('div');
+    div.style.cssText = 'display:flex;align-items:flex-start;gap:7px;background:var(--m-g7);border-left:3px solid #C0392B;padding:5px 8px;border-radius:2px;';
+    div.innerHTML = '<div style="font-size:9px;font-weight:800;color:#C0392B;font-family:Share Tech Mono,monospace;white-space:nowrap;min-width:70px;margin-top:1px;">'+zone+'</div>'+
+      '<div style="font-size:10px;color:var(--m-g2);line-height:1.5;flex:1;">'+bmZoneData[zone].join(', ')+'</div>'+
+      '<button onclick="bmRemoveZone(\''+zone.replace(/'/g,"\\'")+'\')" style="background:transparent;border:none;color:var(--m-g4);cursor:pointer;font-size:12px;padding:0 2px;line-height:1;transition:color .12s;" onmouseover="this.style.color=\'#C0392B\'" onmouseout="this.style.color=\'var(--m-g4)\'">✕</button>';
+    list.appendChild(div);
+  });
+}
+function bmRemoveZone(zone){ delete bmZoneData[zone]; bmRenderAll(); }
+window.bmClearAll = () => { bmZoneData = {}; bmRenderAll(); };
+
+function bmInitHover(){
+  Object.keys(BM_ZONES).forEach(zone => {
+    const gid = 'bmg-' + zone.replace(/\s+/g,'');
+    const g = document.getElementById(gid); if(!g) return;
+    g.addEventListener('mouseenter', () => {
+      if(bmZoneData[zone]?.length) return;
+      BM_ZONES[zone].shapes.forEach(sid => {
+        const el = document.getElementById(sid); if(!el) return;
+        el.setAttribute('fill','rgba(192,57,43,0.14)'); el.setAttribute('stroke','#C0392B');
+      });
+    });
+    g.addEventListener('mouseleave', () => {
+      if(bmZoneData[zone]?.length) return;
+      BM_ZONES[zone].shapes.forEach(sid => {
+        const el = document.getElementById(sid); if(!el) return;
+        el.setAttribute('fill','#282828'); el.setAttribute('stroke','#555');
+      });
+    });
+  });
+}
+document.addEventListener('DOMContentLoaded', bmInitHover);
+
+window.bmZoneClick = zone => {
+  const current = bmZoneData[zone] || [];
+  const checksHtml = BM_TYPES.map(t => {
+    const checked = current.includes(t);
+    return `<label class="bm-popup-ci${checked?' checked':''}">
+      <input type="checkbox" value="${t}"${checked?' checked':''} onchange="this.closest('label').classList.toggle('checked',this.checked)">
+      ${t}</label>`;
+  }).join('');
+  const overlay = document.createElement('div');
+  overlay.className = 'bm-popup-overlay';
+  overlay.innerHTML = `<div class="bm-popup">
+    <div class="bm-popup-title">⊕ ${zone}</div>
+    <div class="bm-popup-sub">Verletzungsart — Mehrfachauswahl</div>
+    <div class="bm-popup-checks">${checksHtml}</div>
+    <div class="bm-popup-btns">
+      <button class="bm-btn-cancel" id="bm-cancel">Abbrechen</button>
+      <button class="bm-btn-ok" id="bm-ok">Übernehmen</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  document.getElementById('bm-ok').onclick = () => {
+    const sel = [...overlay.querySelectorAll('input[type=checkbox]:checked')].map(c=>c.value);
+    if(sel.length) bmZoneData[zone]=sel; else delete bmZoneData[zone];
+    bmClosePopup(overlay); bmRenderAll();
+  };
+  document.getElementById('bm-cancel').onclick = () => bmClosePopup(overlay);
+  overlay.addEventListener('click', e => { if(e.target===overlay) bmClosePopup(overlay); });
+};
+function bmClosePopup(overlay){
+  overlay.style.opacity='0'; overlay.style.transition='opacity .13s';
+  setTimeout(()=>{ if(overlay.parentNode) overlay.parentNode.removeChild(overlay); },140);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PUSH-BENACHRICHTIGUNGEN (Kat. I Alarm)
+   ═══════════════════════════════════════════════════════════ */
+let alertedKeys  = new Set();
+let alertSnoozed = false;
+let alertAudioCtx = null;
+
+function alertSnoozeToggle(){
+  alertSnoozed = !alertSnoozed;
+  const btn = document.getElementById('alert-snooze-btn');
+  if(btn){ btn.textContent = alertSnoozed ? '🔇 Stummgeschaltet' : '🔔 Ton aktiv'; btn.style.opacity = alertSnoozed ? '.6' : '1'; }
+  toast(alertSnoozed ? 'Alarmton stummgeschaltet' : 'Alarmton aktiv', 'info');
+}
+
+function playAlertSound(){
+  if(alertSnoozed) return;
+  try {
+    if(!alertAudioCtx) alertAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = alertAudioCtx;
+    [0, 0.18, 0.36].forEach(delay => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.setValueAtTime(880, ctx.currentTime + delay);
+      osc.frequency.setValueAtTime(660, ctx.currentTime + delay + 0.08);
+      gain.gain.setValueAtTime(0.35, ctx.currentTime + delay);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.22);
+      osc.start(ctx.currentTime + delay);
+      osc.stop(ctx.currentTime + delay + 0.22);
+    });
+  } catch(e){}
+}
+
+function checkAlerts(prevPatients){
+  if(!isOnline) return;
+  patients.forEach(p => {
+    const old = prevPatients.find(o => o.id === p.id);
+    // Auslöser 1: Neu angelegt mit Kat. I
+    const keyNew = p.id + '_new_I';
+    if(p.cat === 'I' && !old && !alertedKeys.has(keyNew)){
+      alertedKeys.add(keyNew);
+      fireAlert(`🚨 Neuer Patient #${pad(p.num)} — KAT. I SOFORT!`, p);
+    }
+    // Auslöser 2: Kategorie zu I verschlechtert
+    const keyCat = p.id + '_cat_I';
+    if(p.cat === 'I' && old && old.cat !== 'I' && !alertedKeys.has(keyCat)){
+      alertedKeys.add(keyCat);
+      fireAlert(`⚠️ Pat. #${pad(p.num)} → Kat. I! (war: ${old.cat})`, p);
+    }
+    // Dedupe-Reset bei Verbesserung
+    if(old?.cat === 'I' && p.cat !== 'I') alertedKeys.delete(p.id + '_cat_I');
+  });
+}
+
+function fireAlert(msg, patient){
+  // In-App Toast (länger sichtbar)
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show err';
+  clearTimeout(t._t); t._t = setTimeout(() => t.className='toast', 5000);
+  playAlertSound();
+  // Browser Notification wenn Tab nicht aktiv
+  if(document.hidden && Notification?.permission === 'granted'){
+    new Notification('MANV — RettungsNetz', { body: msg, icon: '' });
+  }
+}
+
+// Notification Permission beim Online-Join anfordern
+function requestNotifPermission(){
+  if(Notification?.permission === 'default') Notification.requestPermission();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   EINSATZ-CHAT
+   ═══════════════════════════════════════════════════════════ */
+let chatUser     = null; // { name, role }
+let chatOpen     = false;
+let chatPollTimer = null;
+let chatLastTs   = 0;
+
+function chatInit(){
+  const overlay = document.getElementById('chat-overlay');
+  if(!overlay) return;
+  overlay.style.display = chatOpen ? 'flex' : 'none';
+}
+
+window.chatToggle = () => {
+  if(!isOnline){ toast('Chat nur im Online-Modus verfügbar', 'err'); return; }
+  if(!chatUser){ chatShowLogin(); return; }
+  chatOpen = !chatOpen;
+  document.getElementById('chat-overlay').style.display = chatOpen ? 'flex' : 'none';
+  if(chatOpen){ chatLoad(); document.getElementById('chat-input').focus(); }
+};
+
+function chatShowLogin(){
+  const overlay = document.createElement('div');
+  overlay.id = 'chat-login-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,.82);display:flex;align-items:center;justify-content:center;';
+  overlay.innerHTML = `<div style="background:var(--sf);border:1px solid var(--bd2);border-top:3px solid var(--grn);width:360px;padding:24px 28px;display:flex;flex-direction:column;gap:14px;border-radius:4px;">
+    <div style="font-family:var(--cond);font-size:18px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--white);">Chat beitreten</div>
+    <div style="font-family:var(--mono);font-size:8px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;">Username / Charaktername und Funktion eingeben</div>
+    <div style="display:flex;flex-direction:column;gap:4px;">
+      <label style="font-family:var(--mono);font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--dim);">Name / Charakter</label>
+      <input id="chat-login-name" type="text" placeholder="Max Mustermann" autocomplete="off"
+        style="border:1px solid var(--bd);background:var(--sf2);padding:8px 10px;font-family:var(--sans);font-size:13px;color:var(--white);outline:none;border-radius:2px;"
+        onfocus="this.style.borderColor='var(--grn)'" onblur="this.style.borderColor='var(--bd)'"
+        onkeydown="if(event.key==='Enter')document.getElementById('chat-login-role').focus()">
+    </div>
+    <div style="display:flex;flex-direction:column;gap:4px;">
+      <label style="font-family:var(--mono);font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--dim);">Funktion / Qualifikation</label>
+      <select id="chat-login-role" style="border:1px solid var(--bd);background:var(--sf2);padding:8px 10px;font-family:var(--sans);font-size:12px;color:var(--white);outline:none;border-radius:2px;appearance:none;cursor:pointer;"
+        onfocus="this.style.borderColor='var(--grn)'" onblur="this.style.borderColor='var(--bd)'">
+        <option value="">— Funktion wählen —</option>
+        <option>Leitender Notarzt (LNA)</option>
+        <option>Organisatorischer Leiter RD (OrgL)</option>
+        <option>Notarzt (NA)</option>
+        <option>Notfallsanitäter (NFS)</option>
+        <option>Rettungssanitäter (RS)</option>
+        <option>Krankenhausmitarbeiter (KHM)</option>
+        <option>Leitstelle / Disponent</option>
+        <option>Sonstiges</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px;">
+      <button onclick="document.getElementById('chat-login-overlay').remove()" style="font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;border:1px solid var(--bd);background:var(--sf2);color:var(--txt2);padding:0 14px;height:32px;cursor:pointer;border-radius:2px;">Abbrechen</button>
+      <button onclick="chatDoLogin()" style="font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;border:none;background:var(--grn);color:#fff;padding:0 18px;height:32px;cursor:pointer;border-radius:2px;font-weight:700;">Beitreten</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  setTimeout(()=>document.getElementById('chat-login-name')?.focus(), 100);
+}
+
+function chatDoLogin(){
+  const name = document.getElementById('chat-login-name')?.value.trim();
+  const role = document.getElementById('chat-login-role')?.value;
+  if(!name){ toast('Name eingeben!','err'); return; }
+  if(!role){ toast('Funktion wählen!','err'); return; }
+  chatUser = {name, role, id: MY_ID};
+  document.getElementById('chat-login-overlay')?.remove();
+  chatOpen = true;
+  document.getElementById('chat-overlay').style.display = 'flex';
+  chatLoad();
+  document.getElementById('chat-input')?.focus();
+  startChatPoll();
+}
+
+async function chatSend(){
+  const inp = document.getElementById('chat-input');
+  const msg = inp?.value.trim();
+  if(!msg || !chatUser || !isOnline) return;
+  inp.value = '';
+  const entry = {id: uid(), user: chatUser.name, role: chatUser.role, msg, ts: Date.now(), time: stamp()};
+  try { await fbPut('/manv/chat/' + entry.id, entry); } catch(e){ toast('Chat-Fehler','err'); }
+}
+
+async function chatLoad(){
+  if(!isOnline) return;
+  try {
+    const data = await fbGet('/manv/chat');
+    const msgs = data ? Object.values(data).sort((a,b)=>a.ts-b.ts) : [];
+    renderChat(msgs);
+  } catch(e){}
+}
+
+function renderChat(msgs){
+  const box = document.getElementById('chat-messages');
+  if(!box) return;
+  const wasBottom = box.scrollHeight - box.scrollTop < box.clientHeight + 60;
+  box.innerHTML = '';
+  msgs.forEach(m => {
+    const isMe = m.user === chatUser?.name;
+    const div = document.createElement('div');
+    div.style.cssText = `display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'};gap:2px;margin-bottom:8px;`;
+    div.innerHTML = `
+      <div style="font-family:var(--mono);font-size:8px;letter-spacing:1px;color:var(--dim);text-transform:uppercase;">
+        ${isMe?'':m.user+' · '}${m.role}${isMe?' · Du':''}${' · '+m.time}
+      </div>
+      <div style="max-width:80%;padding:8px 12px;border-radius:${isMe?'10px 10px 2px 10px':'10px 10px 10px 2px'};background:${isMe?'rgba(82,183,136,.15)':'var(--sf2)'};border:1px solid ${isMe?'rgba(82,183,136,.3)':'var(--bd)'};font-size:13px;color:var(--txt);line-height:1.45;word-break:break-word;">
+        ${esc(m.msg)}
+      </div>`;
+    box.appendChild(div);
+  });
+  if(wasBottom || msgs[msgs.length-1]?.user === chatUser?.name) box.scrollTop = box.scrollHeight;
+}
+
+function startChatPoll(){
+  stopChatPoll();
+  const loop = async () => {
+    if(!isOnline || !chatOpen) return;
+    await chatLoad();
+    chatPollTimer = setTimeout(loop, 1500);
+  };
+  chatPollTimer = setTimeout(loop, 1500);
+}
+function stopChatPoll(){ if(chatPollTimer){ clearTimeout(chatPollTimer); chatPollTimer=null; } }
+
+/* ═══════════════════════════════════════════════════════════
+   HELL/DUNKEL MODUS
+   ═══════════════════════════════════════════════════════════ */
+let _darkMode = true;
+function toggleTheme(){
+  _darkMode = !_darkMode;
+  applyTheme();
+  const lbl = document.getElementById('theme-label');
+  if(lbl) lbl.textContent = _darkMode ? 'Hell' : 'Dunkel';
+}
+function applyTheme(){
+  if(_darkMode){
+    document.documentElement.style.setProperty('--bg','#080b10');
+    document.documentElement.style.setProperty('--sf','#0d1117');
+    document.documentElement.style.setProperty('--sf2','#111822');
+    document.documentElement.style.setProperty('--sf3','#161e2e');
+    document.documentElement.style.setProperty('--bd','#1e2a3a');
+    document.documentElement.style.setProperty('--bd2','#253040');
+    document.documentElement.style.setProperty('--txt','#cdd6e8');
+    document.documentElement.style.setProperty('--txt2','#8a9ab5');
+    document.documentElement.style.setProperty('--dim','#627794');
+    document.documentElement.style.setProperty('--white','#f0f4fa');
+    document.documentElement.style.setProperty('--m-bg','#141414');
+    document.documentElement.style.setProperty('--m-card','#1E1E1E');
+    document.documentElement.style.setProperty('--m-g1','#E8E8E8');
+    document.documentElement.style.setProperty('--m-g2','#CCCCCC');
+    document.documentElement.style.setProperty('--m-g4','#777777');
+    document.documentElement.style.setProperty('--m-g6','#333333');
+    document.documentElement.style.setProperty('--m-g7','#282828');
+    document.documentElement.style.setProperty('--m-bd','1px solid #383838');
+    document.documentElement.style.setProperty('--m-inp','#282828');
+    document.documentElement.style.setProperty('--m-foc','#2E2E2E');
+    document.documentElement.style.setProperty('--m-head','#252525');
+  } else {
+    document.documentElement.style.setProperty('--bg','#E8E3DC');
+    document.documentElement.style.setProperty('--sf','#FFFFFF');
+    document.documentElement.style.setProperty('--sf2','#F4F3F1');
+    document.documentElement.style.setProperty('--sf3','#ECEAE6');
+    document.documentElement.style.setProperty('--bd','#D4CEC8');
+    document.documentElement.style.setProperty('--bd2','#C0BAB4');
+    document.documentElement.style.setProperty('--txt','#2D2D2D');
+    document.documentElement.style.setProperty('--txt2','#666666');
+    document.documentElement.style.setProperty('--dim','#888888');
+    document.documentElement.style.setProperty('--white','#1A1A1A');
+    document.documentElement.style.setProperty('--m-bg','#FFFFFF');
+    document.documentElement.style.setProperty('--m-card','#FAFAFA');
+    document.documentElement.style.setProperty('--m-g1','#1A1A1A');
+    document.documentElement.style.setProperty('--m-g2','#2D2D2D');
+    document.documentElement.style.setProperty('--m-g4','#888888');
+    document.documentElement.style.setProperty('--m-g6','#E0E0E0');
+    document.documentElement.style.setProperty('--m-g7','#F4F3F1');
+    document.documentElement.style.setProperty('--m-bd','1px solid #D4CEC8');
+    document.documentElement.style.setProperty('--m-inp','#F4F3F1');
+    document.documentElement.style.setProperty('--m-foc','#FFFFFF');
+    document.documentElement.style.setProperty('--m-head','#F0EEEB');
+  }
+}
+
+
 window.addEventListener('message', e => {
   const d = e.data; if(!d || d.target !== 'manv') return;
   if(d.fn === 'openNewPatient')  window.openNew();
@@ -1203,6 +1740,11 @@ window.addEventListener('message', e => {
   if(d.fn === 'confirmClearAll') confirmClearAll();
   if(d.fn === 'importFromParent' && d.arg) try{ doImport(JSON.parse(d.arg)); }catch(e){ toast('Ungültige Datei','err'); }
   if(d.fn === 'toggleMode')      window.handleModeSwitch();
+  if(d.fn === 'toggleTheme')     toggleTheme();
+  if(d.fn === 'setFirebaseUrl' && d.arg) {
+    if(!isOnline){ FB = d.arg; toast('Server: '+d.arg.replace('https://','').split('.')[0],'info'); }
+  }
+  if(d.fn === 'leaveOnline') { if(isOnline) goOffline(); }
 });
 window.exportAll       = expAll;
 window.importData      = importData;
@@ -1215,5 +1757,33 @@ resetMed();
 render();
 notifyParent(0);
 </script>
+<!-- ══ EINSATZ-CHAT PANEL ══ -->
+<div id="chat-overlay">
+  <div class="chat-header">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="color:var(--grn);flex-shrink:0;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span class="chat-title">Einsatz-Chat</span>
+    <button class="chat-close" onclick="chatToggle()">✕</button>
+  </div>
+  <div id="chat-messages"></div>
+  <div class="chat-footer">
+    <input id="chat-input" type="text" placeholder="Nachricht …" autocomplete="off" maxlength="300"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();chatSend();}">
+    <button class="chat-send" onclick="chatSend()">Senden</button>
+  </div>
+</div>
+
+<!-- ══ FLOATING TOOLBAR (Chat + Snooze + Theme) ══ -->
+<div id="floating-toolbar" style="position:fixed;bottom:16px;left:258px;display:flex;align-items:center;gap:6px;z-index:500;">
+  <button id="alert-snooze-btn" onclick="alertSnoozeToggle()">🔔 Ton aktiv</button>
+  <button onclick="chatToggle()" style="font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;border:1px solid var(--grn);background:rgba(82,183,136,.1);color:var(--grn);padding:0 12px;height:26px;cursor:pointer;border-radius:3px;white-space:nowrap;display:flex;align-items:center;gap:5px;transition:all .15s;" onmouseover="this.style.background='rgba(82,183,136,.2)'" onmouseout="this.style.background='rgba(82,183,136,.1)'">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    Chat
+  </button>
+  <button onclick="toggleTheme()" style="font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;border:1px solid var(--bd);background:var(--sf2);color:var(--txt2);padding:0 12px;height:26px;cursor:pointer;border-radius:3px;white-space:nowrap;display:flex;align-items:center;gap:5px;transition:all .15s;" onmouseover="this.style.borderColor='var(--txt2)';this.style.color='var(--txt)'" onmouseout="this.style.borderColor='var(--bd)';this.style.color='var(--txt2)'">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+    <span id="theme-label">Hell</span>
+  </button>
+</div>
+
 </body>
 </html>
