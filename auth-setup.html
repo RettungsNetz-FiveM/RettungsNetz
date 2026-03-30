@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RettungsNetz · Account einrichten</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Share+Tech+Mono&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080b10; --sf: #0d1117; --sf2: #111822; --sf3: #161e2e;
+  --bd: #1e2a3a; --bd2: #253040;
+  --red: #e63946; --red2: #c1121f; --red-glow: rgba(230,57,70,.18);
+  --amb: #f4a261; --grn: #52b788; --blu: #4895ef; --pur: #8b5cf6;
+  --txt: #cdd6e8; --txt2: #8a9ab5; --dim: #4a5a70; --white: #f0f4fa;
+  --mono: 'Share Tech Mono', monospace;
+  --cond: 'Barlow Condensed', sans-serif;
+  --sans: 'Barlow', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { min-height: 100vh; background: var(--bg); color: var(--txt); font-family: var(--sans); }
+
+body::before {
+  content: ''; position: fixed; inset: 0; z-index: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(230,57,70,.06) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.page {
+  position: relative; z-index: 1;
+  max-width: 640px; margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+
+/* Header */
+.h-logo {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 40px;
+}
+.h-sigil {
+  width: 36px; height: 36px; background: var(--red);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--cond); font-size: 14px; font-weight: 900;
+  letter-spacing: 1px; color: #fff;
+  clip-path: polygon(0 0, 85% 0, 100% 50%, 85% 100%, 0 100%);
+}
+.h-name { font-family: var(--cond); font-size: 20px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; color: var(--white); }
+.h-name em { color: var(--red); font-style: normal; }
+
+/* Steps */
+.steps {
+  display: flex; gap: 0; margin-bottom: 40px;
+  border: 1px solid var(--bd); background: var(--sf);
+}
+.step {
+  flex: 1; padding: 12px 16px; text-align: center;
+  font-family: var(--mono); font-size: 9px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--dim); border-right: 1px solid var(--bd);
+  transition: all .2s; position: relative;
+}
+.step:last-child { border-right: none; }
+.step.active { color: var(--grn); background: rgba(82,183,136,.06); }
+.step.done   { color: var(--txt2); }
+.step.active::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+  height: 2px; background: var(--grn);
+}
+
+/* Cards */
+.card {
+  background: var(--sf); border: 1px solid var(--bd);
+  border-top: 3px solid var(--grn); padding: 28px 28px;
+  margin-bottom: 16px; display: none;
+}
+.card.active { display: block; }
+.card-title {
+  font-family: var(--cond); font-size: 24px; font-weight: 800;
+  letter-spacing: 2px; text-transform: uppercase; color: var(--white);
+  margin-bottom: 6px;
+}
+.card-sub {
+  font-size: 13px; font-weight: 300; color: var(--txt2);
+  line-height: 1.6; margin-bottom: 24px;
+}
+
+/* Discord Connect */
+.discord-btn {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 20px; background: #5865F2;
+  border: none; border-radius: 4px; cursor: pointer;
+  font-family: var(--sans); font-size: 14px; font-weight: 600;
+  color: #fff; width: 100%; transition: all .15s;
+}
+.discord-btn:hover { background: #4752C4; transform: translateY(-1px); }
+.discord-btn svg { flex-shrink: 0; }
+
+/* Discord User Card */
+.discord-user-card {
+  display: flex; align-items: center; gap: 16px;
+  padding: 16px; background: var(--sf2); border: 1px solid var(--bd);
+  border-left: 3px solid #5865F2; margin-bottom: 24px;
+}
+.discord-user-card img {
+  width: 52px; height: 52px; border-radius: 50%;
+  border: 2px solid var(--bd);
+}
+.discord-user-card .disc-name {
+  font-family: var(--cond); font-size: 20px; font-weight: 700;
+  letter-spacing: 1px; color: var(--white);
+}
+.discord-user-card .disc-tag {
+  font-family: var(--mono); font-size: 10px; color: var(--txt2);
+  letter-spacing: 1px; margin-top: 3px;
+}
+
+/* Form */
+.form-group { margin-bottom: 18px; }
+.form-label {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--dim); display: block; margin-bottom: 6px;
+}
+.form-input {
+  width: 100%; background: var(--sf2); border: 1px solid var(--bd);
+  color: var(--txt); font-family: var(--sans); font-size: 14px;
+  padding: 10px 14px; border-radius: 3px; outline: none;
+  transition: border-color .15s;
+}
+.form-input:focus { border-color: var(--grn); }
+.form-hint { font-size: 11px; color: var(--dim); margin-top: 5px; font-family: var(--mono); }
+
+/* Avatar Preview */
+.avatar-row {
+  display: flex; align-items: center; gap: 16px; margin-bottom: 18px;
+}
+.avatar-preview {
+  width: 64px; height: 64px; border-radius: 50%;
+  border: 2px solid var(--bd); background: var(--sf3);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; flex-shrink: 0;
+}
+.avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
+.avatar-preview .av-fallback { font-size: 28px; }
+
+/* Server List */
+.server-list { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.server-card {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px; background: var(--sf2); border: 1px solid var(--bd);
+  border-radius: 3px; cursor: pointer; transition: all .15s;
+}
+.server-card:hover  { border-color: var(--bd2); background: var(--sf3); }
+.server-card.selected { border-color: var(--grn); background: rgba(82,183,136,.06); }
+.server-card img { width: 44px; height: 44px; border-radius: 3px; object-fit: cover; }
+.server-card .srv-name {
+  font-family: var(--cond); font-size: 17px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase; color: var(--white);
+}
+.server-card.selected .srv-name { color: var(--grn); }
+.server-card .srv-desc { font-size: 12px; color: var(--txt2); margin-top: 2px; }
+
+/* Buttons */
+.btn-row { display: flex; gap: 8px; margin-top: 24px; }
+.btn {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 1px;
+  padding: 0 18px; height: 38px; border-radius: 3px;
+  border: 1px solid var(--bd); background: var(--sf2); color: var(--txt);
+  cursor: pointer; text-transform: uppercase; transition: all .15s;
+  display: flex; align-items: center; gap: 6px;
+}
+.btn:hover { border-color: var(--red); color: var(--red); }
+.btn.pri { background: var(--grn); border-color: var(--grn); color: #fff; flex: 1; justify-content: center; }
+.btn.pri:hover { background: #3d8f67; }
+.btn.pri:disabled { opacity: .4; pointer-events: none; }
+
+/* Pending */
+.pending-box {
+  text-align: center; padding: 40px 28px;
+  border: 1px solid var(--bd); background: var(--sf);
+  border-top: 3px solid var(--amb); display: none;
+}
+.pending-box .p-icon { font-size: 48px; margin-bottom: 16px; }
+.pending-box .p-title {
+  font-family: var(--cond); font-size: 24px; font-weight: 800;
+  letter-spacing: 2px; text-transform: uppercase; color: var(--white); margin-bottom: 8px;
+}
+.pending-box .p-msg { font-size: 13px; color: var(--txt2); line-height: 1.6; }
+
+/* Loading overlay */
+.loading {
+  display: none; position: fixed; inset: 0; z-index: 9999;
+  background: rgba(8,11,16,.85); backdrop-filter: blur(4px);
+  align-items: center; justify-content: center; flex-direction: column; gap: 16px;
+}
+.loading.show { display: flex; }
+.spinner {
+  width: 36px; height: 36px; border: 2px solid var(--bd);
+  border-top-color: var(--grn); border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-label { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--grn); }
+
+/* Error */
+.error-msg {
+  background: rgba(230,57,70,.1); border: 1px solid rgba(230,57,70,.3);
+  padding: 10px 14px; border-radius: 3px; font-size: 12px;
+  color: var(--red); margin-top: 12px; display: none; font-family: var(--mono);
+}
+.error-msg.show { display: block; }
+</style>
+</head>
+<body>
+
+<div class="loading" id="loading">
+  <div class="spinner"></div>
+  <div class="loading-label" id="loading-label">Lade…</div>
+</div>
+
+<div class="page">
+  <div class="h-logo">
+    <div class="h-sigil">RN</div>
+    <div class="h-name">Rettungs<em>Netz</em> · Account einrichten</div>
+  </div>
+
+  <div class="steps">
+    <div class="step active" id="step-1">01 · Discord</div>
+    <div class="step" id="step-2">02 · Profil</div>
+    <div class="step" id="step-3">03 · Server</div>
+    <div class="step" id="step-4">04 · Fertig</div>
+  </div>
+
+  <!-- STEP 1: Discord verbinden -->
+  <div class="card active" id="card-1">
+    <div class="card-title">Discord verbinden</div>
+    <div class="card-sub">Um einen Account zu erstellen, verbinde dich mit Discord. Wir prüfen damit auf welchem Discord-Server du bist und welche Rollen du hast.</div>
+    <button class="discord-btn" onclick="startDiscordLogin()">
+      <svg width="24" height="18" viewBox="0 0 24 18" fill="white">
+        <path d="M20.317 1.492a19.84 19.84 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.31 18.31 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 1.492a.07.07 0 00-.032.027C.533 6.093-.32 10.555.099 14.961a.08.08 0 00.031.055 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.442a.061.061 0 00-.031-.03z"/>
+      </svg>
+      Mit Discord anmelden
+    </button>
+    <div class="error-msg" id="err-1"></div>
+  </div>
+
+  <!-- STEP 2: Profil -->
+  <div class="card" id="card-2">
+    <div class="card-title">Profil einrichten</div>
+    <div class="card-sub">Wähle einen Nicknamen (Charakter-Name) und optional ein Profilbild.</div>
+
+    <div id="discord-user-display"></div>
+
+    <div class="form-group">
+      <label class="form-label">Nickname / Charakter-Name</label>
+      <input class="form-input" id="input-nickname" type="text" maxlength="32" placeholder="z.B. Max Mustermann">
+      <div class="form-hint">Wird in allen Modulen als dein Name angezeigt</div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Profilbild (optional)</label>
+      <div class="avatar-row">
+        <div class="avatar-preview" id="avatar-preview">
+          <span class="av-fallback">👤</span>
+        </div>
+        <div style="flex:1;">
+          <div class="form-hint" style="margin-bottom:8px;">Leer lassen = Discord-Avatar wird verwendet</div>
+          <input class="form-input" id="input-avatar" type="url" placeholder="https://..." oninput="previewAvatar(this.value)">
+        </div>
+      </div>
+    </div>
+
+    <div class="error-msg" id="err-2"></div>
+    <div class="btn-row">
+      <button class="btn pri" onclick="goStep3()">Weiter →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Server wählen -->
+  <div class="card" id="card-3">
+    <div class="card-title">Server auswählen</div>
+    <div class="card-sub">Wähle den Server (Wache/Organisation) dem du beitreten möchtest. Ein Admin muss dich danach freischalten.</div>
+    <div class="server-list" id="server-list">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--dim);text-align:center;padding:20px;">Lade Server…</div>
+    </div>
+    <div class="error-msg" id="err-3"></div>
+    <div class="btn-row">
+      <button class="btn" onclick="goStep2()">← Zurück</button>
+      <button class="btn pri" id="btn-join" disabled onclick="submitJoin()">Beitrittsantrag senden</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: Pending / Done -->
+  <div class="pending-box" id="card-4">
+    <div class="p-icon">⏳</div>
+    <div class="p-title">Antrag gesendet!</div>
+    <div class="p-msg" id="pending-msg">
+      Dein Beitrittsantrag wurde gesendet. Ein Admin des Servers muss dich freischalten.<br><br>
+      Sobald du freigeschaltet wirst, erscheint auf dem Dashboard ein Hinweis.<br><br>
+      <a href="index.html" style="color:var(--grn);text-decoration:none;font-family:var(--mono);font-size:11px;letter-spacing:1px;">← Zurück zum Dashboard</a>
+    </div>
+  </div>
+
+</div>
+
+<script type="module">
+import {
+  discordLogin, exchangeDiscordCode, fetchDiscordUser,
+  createOrUpdateUser, saveSession, updateUserProfile,
+  setUserServer, getAllServers, getUser, isDevAccount
+} from './auth-core.js';
+
+let _discordUser = null;
+let _selectedServer = null;
+
+const show = id => document.getElementById(id);
+const loading = (s, l='Lade…') => {
+  show('loading').className = 'loading' + (s ? ' show' : '');
+  show('loading-label').textContent = l;
+};
+const showErr = (id, msg) => {
+  const el = show(id);
+  el.textContent = msg;
+  el.className = 'error-msg show';
+};
+
+// ── Step navigation ──
+function activateStep(n) {
+  [1,2,3,4].forEach(i => {
+    const step = show('step-' + i);
+    const card = show('card-' + i);
+    if (!step) return;
+    step.className = 'step' + (i === n ? ' active' : i < n ? ' done' : '');
+    if (card) {
+      if (i === 4) {
+        card.style.display = n === 4 ? 'block' : 'none';
+      } else {
+        card.className = 'card' + (i === n ? ' active' : '');
+      }
+    }
+  });
+}
+
+// ── Discord Login ──
+window.startDiscordLogin = () => discordLogin();
+
+// ── Check for callback code ──
+async function checkCallbackCode() {
+  const code = sessionStorage.getItem('discord_code');
+  if (!code) return;
+  
+  loading(true, 'Discord verbinden…');
+  try {
+    const tokens = await exchangeDiscordCode(code);
+    sessionStorage.removeItem('discord_code');
+    sessionStorage.setItem('discord_token', tokens.access_token);
+    if (tokens.refresh_token) sessionStorage.setItem('discord_refresh', tokens.refresh_token);
+    
+    const dUser = await fetchDiscordUser(tokens.access_token);
+    _discordUser = dUser;
+
+    // Check if user already exists
+    loading(true, 'Account prüfen…');
+    const existingUser = await getUser(dUser.id);
+    
+    if (existingUser && existingUser.status === 'approved') {
+      // Already approved — update tokens and go to dashboard
+      await createOrUpdateUser(dUser, tokens.access_token, tokens.refresh_token || '');
+      saveSession(dUser.id, tokens.access_token);
+      loading(false);
+      window.location.href = 'index.html';
+      return;
+    }
+
+    if (existingUser && existingUser.status === 'pending') {
+      await createOrUpdateUser(dUser, tokens.access_token, tokens.refresh_token || '');
+      saveSession(dUser.id, tokens.access_token);
+      activateStep(4);
+      loading(false);
+      return;
+    }
+
+    // New user or needs setup
+    await createOrUpdateUser(dUser, tokens.access_token, tokens.refresh_token || '');
+    saveSession(dUser.id, tokens.access_token);
+    loading(false);
+    showDiscordUser(dUser, existingUser);
+    activateStep(2);
+
+  } catch(e) {
+    loading(false);
+    console.error(e);
+    showErr('err-1', 'Discord-Fehler: ' + e.message);
+  }
+}
+
+function showDiscordUser(dUser, existing) {
+  const avatarUrl = dUser.avatar
+    ? `https://cdn.discordapp.com/avatars/${dUser.id}/${dUser.avatar}.png`
+    : null;
+  
+  document.getElementById('discord-user-display').innerHTML = `
+    <div class="discord-user-card">
+      ${avatarUrl ? `<img src="${avatarUrl}" alt="">` : '<div style="width:52px;height:52px;border-radius:50%;background:var(--sf3);display:flex;align-items:center;justify-content:center;font-size:24px;">👤</div>'}
+      <div>
+        <div class="disc-name">${dUser.global_name || dUser.username}</div>
+        <div class="disc-tag">@${dUser.username} · ✓ Verbunden</div>
+      </div>
+    </div>`;
+  
+  // Prefill nickname
+  const nick = show('input-nickname');
+  nick.value = existing?.nickname || dUser.global_name || dUser.username;
+  
+  // Prefill avatar
+  const av = show('input-avatar');
+  if (existing?.avatar && existing.avatar !== avatarUrl) {
+    av.value = existing.avatar;
+    previewAvatar(existing.avatar);
+  } else if (avatarUrl) {
+    previewAvatar(avatarUrl);
+  }
+}
+
+// ── Avatar preview ──
+window.previewAvatar = (url) => {
+  const prev = show('avatar-preview');
+  if (!url) {
+    prev.innerHTML = '<span class="av-fallback">👤</span>';
+    return;
+  }
+  const img = document.createElement('img');
+  img.src = url;
+  img.onerror = () => { prev.innerHTML = '<span class="av-fallback">👤</span>'; };
+  img.onload  = () => { prev.innerHTML = ''; prev.appendChild(img); };
+};
+
+// ── Step 2 → 3 ──
+window.goStep3 = async () => {
+  const nick = show('input-nickname').value.trim();
+  if (nick.length < 2) { showErr('err-2', 'Nickname muss mindestens 2 Zeichen haben.'); return; }
+  
+  loading(true, 'Profil speichern…');
+  try {
+    const avatarInput = show('input-avatar').value.trim();
+    const discordAvatar = _discordUser?.avatar
+      ? `https://cdn.discordapp.com/avatars/${_discordUser.id}/${_discordUser.avatar}.png`
+      : null;
+    const avatar = avatarInput || discordAvatar;
+    
+    await updateUserProfile(_discordUser.id, { nickname: nick, avatar });
+    loading(false);
+    await loadServers();
+    activateStep(3);
+  } catch(e) {
+    loading(false);
+    showErr('err-2', 'Fehler: ' + e.message);
+  }
+};
+
+window.goStep2 = () => activateStep(2);
+
+// ── Load servers ──
+async function loadServers() {
+  const list = show('server-list');
+  try {
+    const servers = await getAllServers();
+    if (servers.length === 0) {
+      list.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--dim);text-align:center;padding:20px;">Keine Server verfügbar</div>';
+      return;
+    }
+    list.innerHTML = servers.map(srv => `
+      <div class="server-card" id="srv-${srv.id}" onclick="selectServer('${srv.id}')">
+        ${srv.icon ? `<img src="${srv.icon}" onerror="this.style.display='none'" alt="">` : '<div style="width:44px;height:44px;background:var(--sf3);border:1px solid var(--bd);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:20px;">🏢</div>'}
+        <div>
+          <div class="srv-name">${srv.name}</div>
+          <div class="srv-desc">${srv.description || ''}</div>
+        </div>
+      </div>`).join('');
+    
+    window._serversData = servers;
+  } catch(e) {
+    list.innerHTML = '<div style="color:var(--red);font-family:var(--mono);font-size:10px;padding:20px;">Fehler beim Laden: ' + e.message + '</div>';
+  }
+}
+
+window.selectServer = (id) => {
+  document.querySelectorAll('.server-card').forEach(c => c.classList.remove('selected'));
+  const card = show('srv-' + id);
+  if (card) { card.classList.add('selected'); }
+  _selectedServer = window._serversData?.find(s => s.id === id);
+  show('btn-join').disabled = !_selectedServer;
+};
+
+// ── Submit join ──
+window.submitJoin = async () => {
+  if (!_selectedServer) return;
+  loading(true, 'Antrag senden…');
+  try {
+    await setUserServer(_discordUser.id, _selectedServer.id);
+    loading(false);
+    activateStep(4);
+  } catch(e) {
+    loading(false);
+    showErr('err-3', 'Fehler: ' + e.message);
+  }
+};
+
+// ── Init ──
+checkCallbackCode();
+</script>
+</body>
+</html>

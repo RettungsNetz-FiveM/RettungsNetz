@@ -738,7 +738,101 @@ header {
     </div>
 
   </div><!-- /h-toolbar -->
+
+  <!-- ── AUTH WIDGET ── -->
+  <div id="h-auth-widget" style="
+    display:flex; align-items:center; gap:10px;
+    padding: 0 14px; border-left: 1px solid var(--bd);
+    height: 100%; flex-shrink: 0;
+  ">
+    <!-- Nicht eingeloggt -->
+    <div id="auth-guest" style="display:flex;align-items:center;gap:8px;">
+      <button onclick="authOpenPanel()" class="hbtn" style="border-color:#5865F2;color:#5865F2;background:rgba(88,101,242,.08);"
+        onmouseover="this.style.background='rgba(88,101,242,.18)'" onmouseout="this.style.background='rgba(88,101,242,.08)'">
+        <svg width="13" height="10" viewBox="0 0 24 18" fill="currentColor">
+          <path d="M20.317 1.492a19.84 19.84 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.31 18.31 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 1.492a.07.07 0 00-.032.027C.533 6.093-.32 10.555.099 14.961a.08.08 0 00.031.055 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.442a.061.061 0 00-.031-.03z"/>
+        </svg>
+        Anmelden
+      </button>
+    </div>
+    <!-- Eingeloggt -->
+    <div id="auth-user" style="display:none;align-items:center;gap:8px;">
+      <div id="auth-status-pill" style="display:flex;align-items:center;gap:6px;padding:0 10px;height:28px;border:1px solid var(--bd);background:var(--sf2);border-radius:3px;">
+        <span id="auth-status-dot" style="width:6px;height:6px;border-radius:50%;background:var(--grn);flex-shrink:0;"></span>
+        <span id="auth-server-name" style="font-family:var(--mono);font-size:8px;letter-spacing:1px;color:var(--txt2);text-transform:uppercase;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">—</span>
+      </div>
+      <div onclick="authOpenPanel()" style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:3px 8px 3px 3px;border:1px solid var(--bd);background:var(--sf2);border-radius:3px;transition:all .15s;"
+        onmouseover="this.style.borderColor='var(--pur)'" onmouseout="this.style.borderColor='var(--bd)'">
+        <img id="auth-avatar" src="" alt="" style="width:26px;height:26px;border-radius:50%;border:1px solid var(--bd);object-fit:cover;">
+        <span id="auth-nickname" style="font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--txt);max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+      </div>
+      <a id="auth-admin-btn" href="admin-portal.html" style="display:none;font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:0 10px;height:28px;border:1px solid rgba(139,92,246,.4);background:rgba(139,92,246,.1);color:var(--pur);cursor:pointer;border-radius:3px;align-items:center;gap:5px;text-decoration:none;transition:all .15s;"
+        onmouseover="this.style.background='rgba(139,92,246,.2)'" onmouseout="this.style.background='rgba(139,92,246,.1)'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Admin
+      </a>
+    </div>
+  </div>
+
 </header>
+
+<!-- ── AUTH SIDE PANEL ── -->
+<div id="auth-panel-overlay" style="display:none;position:fixed;inset:0;z-index:8500;background:rgba(8,11,16,.6);backdrop-filter:blur(3px);" onclick="if(event.target===this)authClosePanel()">
+  <div id="auth-panel" style="position:fixed;top:54px;right:0;width:300px;height:calc(100vh - 54px);background:var(--sf);border-left:1px solid var(--bd);display:flex;flex-direction:column;overflow-y:auto;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);">
+
+    <!-- Guest view -->
+    <div id="ap-guest" style="padding:24px 20px;">
+      <div style="font-family:var(--cond);font-size:22px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--white);margin-bottom:6px;">Account</div>
+      <div style="font-size:13px;font-weight:300;color:var(--txt2);line-height:1.6;margin-bottom:20px;">Melde dich mit Discord an um Serverfunktionen zu nutzen und mit dem Team zu arbeiten.</div>
+      <div style="background:var(--sf2);border:1px solid var(--bd);padding:12px;border-radius:3px;margin-bottom:18px;">
+        <div style="font-family:var(--mono);font-size:8px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;margin-bottom:6px;">ℹ Kostenlos ohne Account</div>
+        <div style="font-size:12px;color:var(--txt2);line-height:1.6;">Die gesamte Website ist <b style="color:var(--txt);">ohne Account</b> nutzbar. Ein Account ermöglicht Server-Synchronisation und Team-Funktionen.</div>
+      </div>
+      <button onclick="window.location.href='auth-setup.html'" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:11px;background:#5865F2;border:none;border-radius:4px;cursor:pointer;font-family:var(--sans);font-size:14px;font-weight:600;color:#fff;transition:all .15s;"
+        onmouseover="this.style.background='#4752C4'" onmouseout="this.style.background='#5865F2'">
+        <svg width="18" height="14" viewBox="0 0 24 18" fill="white"><path d="M20.317 1.492a19.84 19.84 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.31 18.31 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 1.492a.07.07 0 00-.032.027C.533 6.093-.32 10.555.099 14.961a.08.08 0 00.031.055 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.442a.061.061 0 00-.031-.03z"/></svg>
+        Mit Discord anmelden
+      </button>
+    </div>
+
+    <!-- User view -->
+    <div id="ap-user" style="display:none;flex-direction:column;flex:1;">
+      <div style="padding:20px;border-bottom:1px solid var(--bd);">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+          <img id="ap-avatar" src="" alt="" style="width:50px;height:50px;border-radius:50%;border:2px solid var(--bd);object-fit:cover;">
+          <div>
+            <div id="ap-nickname" style="font-family:var(--cond);font-size:19px;font-weight:800;letter-spacing:1px;color:var(--white);"></div>
+            <div id="ap-discord-tag" style="font-family:var(--mono);font-size:9px;color:var(--txt2);letter-spacing:1px;margin-top:2px;"></div>
+            <div id="ap-role-badge" style="margin-top:4px;"></div>
+          </div>
+        </div>
+        <div style="background:var(--sf2);border:1px solid var(--bd);padding:11px;border-radius:3px;">
+          <div style="font-family:var(--mono);font-size:8px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;margin-bottom:5px;">Server</div>
+          <div id="ap-server-name" style="font-family:var(--cond);font-size:15px;font-weight:700;color:var(--white);">—</div>
+          <div id="ap-server-status" style="font-family:var(--mono);font-size:9px;color:var(--txt2);margin-top:3px;"></div>
+        </div>
+      </div>
+      <div id="ap-pending-notice" style="display:none;padding:14px 20px;background:rgba(244,162,97,.06);border-bottom:1px solid rgba(244,162,97,.2);">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--amb);text-transform:uppercase;margin-bottom:4px;">⏳ Antrag ausstehend</div>
+        <div style="font-size:12px;color:var(--txt2);">Dein Beitrittsantrag wartet auf Freischaltung durch einen Admin.</div>
+      </div>
+      <div style="padding:14px 20px;border-bottom:1px solid var(--bd);display:flex;flex-direction:column;gap:7px;">
+        <a href="auth-setup.html" class="hbtn" style="text-decoration:none;justify-content:flex-start;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Profil bearbeiten
+        </a>
+        <a id="ap-admin-link" href="admin-portal.html" class="hbtn pur" style="display:none;text-decoration:none;justify-content:flex-start;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Admin Portal
+        </a>
+      </div>
+      <div style="flex:1;"></div>
+      <div style="padding:14px 20px;">
+        <button onclick="authLogout()" class="hbtn danger" style="width:100%;justify-content:center;">Abmelden</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ════════════════════════════════════════
      APP SHELL
@@ -1777,3 +1871,75 @@ function ppImportFile(input) {
 </script>
 </body>
 </html>
+
+<script type="module">
+// ════════════════════════════════
+// AUTH INTEGRATION
+// ════════════════════════════════
+import { initAuth, onAuthChange, isAdmin, isDevAccount, logout } from './auth-core.js';
+
+window.authOpenPanel = () => {
+  document.getElementById('auth-panel-overlay').style.display = 'block';
+  setTimeout(() => document.getElementById('auth-panel').style.transform = 'translateX(0)', 10);
+};
+window.authClosePanel = () => {
+  document.getElementById('auth-panel').style.transform = 'translateX(100%)';
+  setTimeout(() => document.getElementById('auth-panel-overlay').style.display = 'none', 260);
+};
+window.authLogout = () => { authClosePanel(); logout(); };
+
+const ROLE_STYLES = {
+  DEV:    'background:rgba(230,57,70,.2);color:#e63946;border:1px solid rgba(230,57,70,.3)',
+  OWNER:  'background:rgba(244,162,97,.2);color:#f4a261;border:1px solid rgba(244,162,97,.3)',
+  ADMIN:  'background:rgba(139,92,246,.2);color:#8b5cf6;border:1px solid rgba(139,92,246,.3)',
+  MEMBER: 'background:rgba(82,183,136,.2);color:#52b788;border:1px solid rgba(82,183,136,.3)',
+  GUEST:  'background:rgba(74,90,112,.2);color:#4a5a70;border:1px solid rgba(74,90,112,.3)'
+};
+
+onAuthChange((user, server) => {
+  const g = document.getElementById('auth-guest');
+  const u = document.getElementById('auth-user');
+  const ag = document.getElementById('ap-guest');
+  const au = document.getElementById('ap-user');
+  if (!user) {
+    g.style.display = 'flex'; u.style.display = 'none';
+    ag.style.display = 'block'; au.style.display = 'none';
+    return;
+  }
+  g.style.display = 'none'; u.style.display = 'flex';
+  ag.style.display = 'none'; au.style.display = 'flex';
+
+  const av = document.getElementById('auth-avatar');
+  if (user.avatar) av.src = user.avatar;
+  document.getElementById('auth-nickname').textContent = user.nickname || user.discordName || '';
+
+  const dot = document.getElementById('auth-status-dot');
+  const srvN = document.getElementById('auth-server-name');
+  if (server && user.status === 'approved') {
+    dot.style.background = 'var(--grn)'; srvN.textContent = server.name;
+  } else if (user.status === 'pending') {
+    dot.style.background = 'var(--amb)'; srvN.textContent = 'Ausstehend';
+  } else {
+    dot.style.background = 'var(--dim)'; srvN.textContent = 'Kein Server';
+  }
+
+  if (isAdmin(user) || isDevAccount(user)) {
+    document.getElementById('auth-admin-btn').style.display = 'flex';
+    document.getElementById('ap-admin-link').style.display = 'flex';
+  }
+
+  document.getElementById('ap-avatar').src = user.avatar || '';
+  document.getElementById('ap-nickname').textContent = user.nickname || user.discordName;
+  document.getElementById('ap-discord-tag').textContent = user.discordTag || '';
+  const rb = document.getElementById('ap-role-badge');
+  rb.textContent = user.role;
+  rb.style.cssText = `display:inline-block;font-family:var(--mono);font-size:8px;letter-spacing:1px;padding:2px 7px;border-radius:2px;text-transform:uppercase;${ROLE_STYLES[user.role] || ROLE_STYLES.GUEST}`;
+  document.getElementById('ap-server-name').textContent = server?.name || (user.serverId ? '…' : 'Kein Server');
+  document.getElementById('ap-server-status').textContent =
+    user.status === 'approved' ? '✓ Freigeschaltet' :
+    user.status === 'pending'  ? '⏳ Wartet auf Freischaltung' : '—';
+  document.getElementById('ap-pending-notice').style.display = user.status === 'pending' ? 'block' : 'none';
+});
+
+initAuth();
+</script>
