@@ -244,6 +244,66 @@ header {
 .corner-deco.br { bottom: 8px; right: 8px; border-bottom: 2px solid var(--red); border-right: 2px solid var(--red); }
 
 /* ════════════════════════════════
+   RESPONSIVE — Tablet / Handy
+════════════════════════════════ */
+
+/* Tablets (≤900px) */
+@media (max-width: 900px) {
+  /* Header: Logo-Untertitel + Datum ausblenden */
+  .h-name-sub { display: none; }
+  .h-clock-block .h-stat:last-child { display: none; }
+
+  /* Toolbar scrollbar statt clipping */
+  .h-toolbar { overflow-x: auto; overflow-y: hidden; }
+  .toolbar-panel { flex-wrap: nowrap; min-width: max-content; }
+
+  /* Dashboard-Grid: 2 Spalten */
+  .modules-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashboard-hero { padding: 24px 20px 20px; }
+  .hero-title { font-size: 34px; }
+  .dashboard-hero::after { display: none; }
+  .modules-section { padding: 20px; }
+  .sysinfo-grid { padding: 0 20px 24px; grid-template-columns: repeat(3, 1fr); }
+}
+
+/* Smartphones (≤600px) */
+@media (max-width: 600px) {
+  html, body { overflow: hidden; }
+
+  /* Header kompakter */
+  header { height: 48px; }
+  .app-shell { height: calc(100vh - 48px); }
+  .h-logo-block { padding: 0 10px; gap: 8px; }
+  .h-sigil { width: 28px; height: 28px; font-size: 11px; }
+  .h-name-main { font-size: 13px; letter-spacing: 2px; }
+  .h-clock-block { padding: 0 10px; gap: 8px; }
+  #clock-val { font-size: 12px; }
+
+  /* Sidebar schmaler */
+  .sidebar { width: 52px; }
+  .nav-btn { width: 40px; height: 40px; }
+  .nav-label { font-size: 7px; }
+
+  /* Toolbar: horizontal scrollbar */
+  .h-toolbar { overflow-x: auto; padding: 0 4px; -webkit-overflow-scrolling: touch; }
+  .toolbar-panel { flex-wrap: nowrap; min-width: max-content; gap: 3px; }
+  .hbtn { padding: 0 8px; font-size: 9px; height: 28px; }
+  .tb-sep { margin: 0 4px; }
+
+  /* Dashboard 1 Spalte */
+  .modules-grid { grid-template-columns: 1fr; }
+  .hero-title { font-size: 26px; }
+  .dashboard-hero { padding: 16px 14px; }
+  .modules-section { padding: 14px; }
+  .sysinfo-grid { padding: 0 14px 16px; grid-template-columns: repeat(2, 1fr); }
+  .sysinfo-val { font-size: 20px; }
+
+  /* Blaulicht-Offset anpassen */
+  #blaulicht { left: 52px; top: 48px; }
+  .corner-deco.tl { left: 60px; }
+}
+
+/* ════════════════════════════════
    BLAULICHT
 ════════════════════════════════ */
 #blaulicht {
