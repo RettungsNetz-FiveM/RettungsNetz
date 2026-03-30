@@ -10,7 +10,7 @@
 <meta property="og:site_name"   content="RettungsNetz">
 <meta property="og:title"       content="RettungsNetz — Fiktives Einsatzmanagement">
 <meta property="og:description" content="Fiktives Einsatzmanagement für Spieler im Roleplay Bereich – Einsatz-Protokoll, Fahrzeugplanung, MANV-Triage und Atemschutzüberwachung in einer zentralen Plattform.">
-<meta property="og:image"       content="https://rettungsnetz.github.io/Dashboard/RettungsNetz-Preview.png">
+<meta property="og:image"       content="images/RettungsNetz-Preview.png">
 <meta property="og:image:width" content="1536">
 <meta property="og:image:height" content="1024">
 <meta property="og:image:alt"   content="RettungsNetz Dashboard Vorschau">
@@ -93,11 +93,7 @@ header {
 .h-stat-val   { font-family: var(--mono); font-size: 11px; color: var(--txt); letter-spacing: 1px; }
 #clock-val    { font-size: 14px; color: var(--grn); text-shadow: 0 0 8px rgba(82,183,136,.4); }
 
-.h-module-tag {
-  display: flex; align-items: center;
-  padding: 0 18px; border-right: 1px solid var(--bd);
-  height: 100%; flex-shrink: 0;
-}
+
 .h-module-inner { display: flex; flex-direction: column; gap: 2px; }
 .h-module-label { font-family: var(--mono); font-size: 7px; letter-spacing: 2px; color: var(--dim); text-transform: uppercase; }
 .h-module-name  { font-family: var(--mono); font-size: 10px; letter-spacing: 1px; color: var(--txt); text-transform: uppercase; }
@@ -416,14 +412,6 @@ header {
     </div>
   </div>
 
-  <!-- Module tag (updates per view) -->
-  <div class="h-module-tag">
-    <div class="h-module-inner">
-      <span class="h-module-label" id="h-mod-label">Aktives Modul</span>
-      <span class="h-module-name"  id="h-mod-name">Start · Übersicht</span>
-    </div>
-  </div>
-
   <!-- ── DYNAMIC TOOLBAR ── -->
   <div class="h-toolbar">
 
@@ -433,7 +421,6 @@ header {
 
     <!-- ── MANV toolbar ── -->
     <div class="toolbar-panel" id="tb-manv">
-      <div class="tb-sep"></div>
       <!-- Online-Mode: JOIN button (shown in offline mode) -->
       <button class="hbtn grn" id="manv-join-btn" onclick="manvOpenServerSelect()" title="Server auswählen und Online-Modus starten">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><circle cx="12" cy="12" r="3"/><path d="M2 12C2 12 5.5 5 12 5s10 7 10 7-3.5 7-10 7S2 12 2 12z"/><path d="M20 4L4 20" stroke="var(--grn)" stroke-width="0" /><path d="M4.93 4.93a10 10 0 0 1 14.14 14.14" stroke-width="0"/></svg>
@@ -479,7 +466,6 @@ header {
 
     <!-- ── PROTOKOLL toolbar ── -->
     <div class="toolbar-panel" id="tb-protokol">
-      <div class="tb-sep"></div>
       <button class="hbtn" id="btn-proto-theme" onclick="protoTheme()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
           <circle cx="12" cy="12" r="5"/>
@@ -517,7 +503,6 @@ header {
 
     <!-- ── FAHRZEUGPLANER toolbar ── -->
     <div class="toolbar-panel" id="tb-fahrzeug">
-      <div class="tb-sep"></div>
       <div class="h-mode-tabs">
         <div class="h-mtab active" id="idx-tab-plan"   onclick="fzSetMode('plan')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" width="12" height="12" style="flex-shrink:0"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
@@ -604,7 +589,6 @@ header {
 
     <!-- ── ATEMSCHUTZ toolbar ── -->
     <div class="toolbar-panel" id="tb-atemschutz">
-      <div class="tb-sep"></div>
       <button class="hbtn" id="btn-atem-theme" onclick="atemTheme()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
           <circle cx="12" cy="12" r="5"/>
@@ -625,9 +609,16 @@ header {
     <!-- ── SCHEMA toolbar ── -->
     <div class="toolbar-panel" id="tb-schema"></div>
 
+    <!-- ── KARTE toolbar ── -->
+    <div class="toolbar-panel" id="tb-karte">
+      <div style="font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--grn);display:flex;align-items:center;gap:6px;">
+        <span style="width:7px;height:7px;border-radius:50%;background:var(--grn);box-shadow:0 0 5px rgba(82,183,136,.5);display:inline-block;"></span>
+        Leaflet.js · PNG-Overlay
+      </div>
+    </div>
+
     <!-- ── MEDIKAMENTEN-KATALOG toolbar ── -->
     <div class="toolbar-panel" id="tb-katalog">
-      <div class="tb-sep"></div>
       <button class="hbtn" onclick="katalogToggleTheme()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13" id="katalog-theme-icon"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
         <span id="katalog-theme-label">Hell</span>
@@ -662,8 +653,6 @@ header {
 
     <!-- ── PERSONALPLAN toolbar ── -->
     <div class="toolbar-panel" id="tb-personalplan">
-
-      <div class="tb-sep"></div>
       <button class="hbtn" onclick="ppSend('doExport')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Export
@@ -754,6 +743,13 @@ header {
         <svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
       </span>
       <span class="nav-label">Med.&shy;Katalog</span>
+    </button>
+
+    <button class="nav-btn" id="nav-karte" onclick="openTool('karte')" title="Lagekarte FiveM">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+      </span>
+      <span class="nav-label">Lage&shy;karte</span>
     </button>
 
     <div class="sidebar-divider"></div>
@@ -880,13 +876,32 @@ header {
               <button class="mc-open-btn">Öffnen →</button>
             </div>
           </div>
+          <div class="module-card" data-accent="blu" onclick="openTool('karte')" style="--card-accent:#4895ef;">
+            <div class="mc-header">
+              <div class="mc-icon-wrap">🗺️</div>
+              <div class="mc-meta">
+                <div class="mc-tag">Modul 08 · Lage</div>
+                <div class="mc-title">FiveM Karte</div>
+              </div>
+            </div>
+            <div class="mc-desc">Interaktive FiveM Lagekarte mit Postzahl-Suche. Zoomen und per Suchfeld direkt zur gewünschten Postzahl springen.</div>
+            <div class="mc-footer">
+              <span class="mc-status">Bereit</span>
+              <button class="mc-open-btn">Öffnen →</button>
+            </div>
+          </div>
         </div>
       </div>
       <div class="sysinfo-grid">
-        <div class="sysinfo-cell"><span class="sysinfo-label">Verfügbare Module</span><span class="sysinfo-val">7</span><span class="sysinfo-note">Praxisnah · Direkt · Leicht</span></div>
+        <div class="sysinfo-cell"><span class="sysinfo-label">Verfügbare Module</span><span class="sysinfo-val">8</span><span class="sysinfo-note">Praxisnah · Direkt · Leicht</span></div>
         <div class="sysinfo-cell"><span class="sysinfo-label">Version</span><span class="sysinfo-val">1.0</span><span class="sysinfo-note">Build 2026.03</span></div>
         <div class="sysinfo-cell"><span class="sysinfo-label">Letztes Update</span><span class="sysinfo-val" id="last-update-date">12.03.2026</span><span class="sysinfo-note" id="last-update-note">Patch · UI · Bugfixes</span></div>
       </div>
+    </div>
+
+    <!-- ── KARTE (iframe) ── -->
+    <div class="tool-view" id="view-karte">
+      <iframe class="tool-frame" id="frame-karte" src="" title="Lagekarte FiveM"></iframe>
     </div>
 
     <!-- ── PROTOKOLL (iframe, kein eigener Topbar nötig) ── -->
@@ -1114,17 +1129,6 @@ header {
 // ════════════════════════════════
 // VIEW / MODULE STATE
 // ════════════════════════════════
-const MODULE_META = {
-  dashboard:    { label: 'Aktives Modul',              name: 'Start · Übersicht'       },
-  protokol:     { label: 'Modul 01 · Dokumentation',   name: 'Einsatz-Protokoll'       },
-  fahrzeug:     { label: 'Modul 02 · Planung',         name: 'Fahrzeug-Planer'         },
-  manv:         { label: 'Modul 03 · MANV',            name: 'MANV Triage'             },
-  atemschutz:   { label: 'Modul 04 · Atemschutz',      name: 'Atemschutzüberwachung'   },
-  schema:       { label: 'Modul 05 · Nachschlagewerk', name: 'Schema-Nachschlagewerk'  },
-  personalplan: { label: 'Modul 06 · Personal',        name: 'Schicht- & Personalplan' },
-  katalog:      { label: 'Modul 07 · Medizin',         name: 'Medikamenten-Katalog'    },
-  info:         { label: 'Aktives Modul',              name: 'Info · Hilfe'            },
-};
 
 let currentView = 'dashboard';
 
@@ -1142,9 +1146,6 @@ function showView(name) {
   const tp = document.getElementById('tb-' + name);
   if (tp) tp.classList.add('active');
 
-  const m = MODULE_META[name] || MODULE_META.dashboard;
-  document.getElementById('h-mod-label').textContent = m.label;
-  document.getElementById('h-mod-name').textContent  = m.name;
 
   currentView = name;
 }
@@ -1153,7 +1154,7 @@ const frameLoaded = {};
 function openTool(tool) {
   showView(tool);
   if (!frameLoaded[tool]) {
-    const src = { protokol: 'Einsatz-Protokol.html', fahrzeug: 'Fahrzeugplaner.html', manv: 'MANV-Triage.html', atemschutz: 'Atemschutzueberwachung.html', schema: 'Schema-Nachschlage.html', personalplan: 'Schicht-Personalplan.html', katalog: 'Medikamenten-Katalog.html' };
+    const src = { protokol: 'Einsatz-Protokol.html', fahrzeug: 'Fahrzeugplaner.html', manv: 'MANV-Triage.html', atemschutz: 'Atemschutzueberwachung.html', schema: 'Schema-Nachschlage.html', personalplan: 'Schicht-Personalplan.html', katalog: 'Medikamenten-Katalog.html', karte: 'Karte.html' };
     const f = document.getElementById('frame-' + tool);
     if (f && src[tool]) { f.src = src[tool]; frameLoaded[tool] = true; }
   }
@@ -1438,7 +1439,7 @@ const MANV_SERVERS = [
     id: 'general',
     name: 'Genereller Server',
     description: 'Allgemeiner Online-Server ohne zugehörigen Game-Server. Für alle frei zugänglich.',
-    icon: 'https://rettungsnetz.github.io/Dashboard/RettungsNetz-Preview.png',
+    icon: 'images/RettungsNetz-Preview.png',
     iconFallback: '🌐',
     firebaseUrl: 'https://rettungsnetz-default-rtdb.europe-west1.firebasedatabase.app'
   },
